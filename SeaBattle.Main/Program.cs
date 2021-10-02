@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SeaBattle.Domain;
 using SeaBattle.Domain.Builders;
+using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Commands;
 using SeaBattle.Domain.Enums;
 

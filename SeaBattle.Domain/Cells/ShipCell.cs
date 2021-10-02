@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SeaBattle.Domain.Enums;
 
-namespace SeaBattle.Domain
+namespace SeaBattle.Domain.Cells
 {
     public class ShipCell : Cell
     {
@@ -15,7 +15,9 @@ namespace SeaBattle.Domain
         public override IEnumerable<Cell> Attack()
         {
             if (Attacked) return Enumerable.Empty<Cell>();
+            
             Attacked = true;
+            
             if (ShipDetails.CellsAlive == 0)
             {
                 var affectedCells = new List<Cell>();

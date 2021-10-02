@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SeaBattle.Domain.Cells;
 
 namespace SeaBattle.Domain.Commands
 {
@@ -25,47 +26,45 @@ namespace SeaBattle.Domain.Commands
                 .ForEach(pos =>
                 {
                     field.NextPositions.Remove(pos);
+                    field.PreviousHits.Remove(pos);
                 });
 
-            if (hit)
+            if (!affectedCell.IsShipDestroyed)
             {
-                if (affectedCell.IsShipDestroyed)
-                {
-                    field.PreviousHits.Clear();
-                    field.NextPositions.Clear();
-                }
-                else
-                {
-                    var nextPositions = field.AvailablePositions
-                        .Intersect(new[]
-                        {
-                            (x: positionX - 1, y: positionY),
-                            (x: positionX, y: positionY + 1),
-                            (x: positionX + 1, y: positionY),
-                            (x: positionX, y: positionY - 1)
-                        });
-                    
-                    field.PreviousHits.Add((x: positionX, y: positionY));
-                    
-                    field.NextPositions.AddRange(nextPositions);
-
-                    if (field.PreviousHits.Count >= 2)
-                    {
-                        var positionPairs = field.PreviousHits
-                            .Join(field.PreviousHits, pos => true, pos => true,
-                                (pos1, pos2) => (pos1, pos2))
-                            .ToList();
-                        var filteredNextPositions = positionPairs.All(x => x.pos1.x == x.pos2.x)
-                            ? field.NextPositions.Where(pos => pos.x == positionPairs.First().pos1.x).ToList()
-                            : field.NextPositions.Where(pos => pos.y == positionPairs.First().pos1.y).ToList();
-
-                        field.NextPositions.Clear();
-                        field.NextPositions.AddRange(filteredNextPositions);
-                    }
-                }
+                GenerateNextPositions(field, positionX, positionY);
             }
 
             return hit;
+        }
+
+        private void GenerateNextPositions(Field field, int positionX, int positionY)
+        {
+            var nextPositions = field.AvailablePositions
+                .Intersect(new[]
+                {
+                    (x: positionX - 1, y: positionY),
+                    (x: positionX, y: positionY + 1),
+                    (x: positionX + 1, y: positionY),
+                    (x: positionX, y: positionY - 1)
+                });
+                    
+            field.PreviousHits.Add((x: positionX, y: positionY));
+                    
+            field.NextPositions.AddRange(nextPositions);
+
+            if (field.PreviousHits.Count >= 2)
+            {
+                var positionPairs = field.PreviousHits
+                    .Join(field.PreviousHits, pos => true, pos => true,
+                        (pos1, pos2) => (pos1, pos2))
+                    .ToList();
+                var filteredNextPositions = positionPairs.All(x => x.pos1.x == x.pos2.x)
+                    ? field.NextPositions.Where(pos => pos.x == positionPairs.First().pos1.x).ToList()
+                    : field.NextPositions.Where(pos => pos.y == positionPairs.First().pos1.y).ToList();
+
+                field.NextPositions.Clear();
+                field.NextPositions.AddRange(filteredNextPositions);
+            }
         }
     }
 }

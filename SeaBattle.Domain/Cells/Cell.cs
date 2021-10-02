@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SeaBattle.Domain.Enums;
 
-namespace SeaBattle.Domain
+namespace SeaBattle.Domain.Cells
 {
     public abstract class Cell
     {

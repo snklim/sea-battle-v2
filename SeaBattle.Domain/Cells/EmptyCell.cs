@@ -1,7 +1,7 @@
 using System;
 using SeaBattle.Domain.Enums;
 
-namespace SeaBattle.Domain
+namespace SeaBattle.Domain.Cells
 {
     public class EmptyCell : Cell
     {

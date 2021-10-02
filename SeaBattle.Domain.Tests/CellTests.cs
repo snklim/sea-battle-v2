@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Enums;
 
 namespace SeaBattle.Domain.Tests

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Enums;
 
 namespace SeaBattle.Domain.Builders

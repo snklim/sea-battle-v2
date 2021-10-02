@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Enums;
 
 namespace SeaBattle.Domain
@@ -11,8 +12,8 @@ namespace SeaBattle.Domain
         public int SizeX { get; }
         public int SizeY { get; }
         public Guid FieldId { get; } = Guid.NewGuid();
-        public List<(int x, int y)> NextPositions { get; } = new List<(int x, int y)>();
-        public List<(int x, int y)> PreviousHits { get; } = new List<(int x, int y)>();
+        public List<(int x, int y)> NextPositions { get; } = new();
+        public List<(int x, int y)> PreviousHits { get; } = new();
 
         public Field(int sizeX, int sizeY)
         {
