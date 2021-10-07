@@ -12,8 +12,6 @@ namespace SeaBattle.Domain
         public Field DefenderField { get; set; }
         public IEnumerable<Cell> Next(AttackPositionCommand command)
         {
-            if (command.FieldId != AttackerField.FieldId) return Enumerable.Empty<Cell>();
-            
             if (!command.Execute(DefenderField, out var affectedCells))
             {
                 (AttackerField, DefenderField) = (DefenderField, AttackerField);

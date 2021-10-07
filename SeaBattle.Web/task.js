@@ -3,12 +3,19 @@
  * @return {number}
  */
 var movesToChessboard = function(board) {
-    var pairs = [];
+
+
+    var totalTime = new Date().getTime();
+
+    var pairs1 = [];
+    var pairs2 = [];
     for (let i = 0; i < board.length - 1; i++) {
         for (let j = i + 1; j < board.length; j++) {
-            pairs.push({t: 'r', i1: i, i2: j});
-            pairs.push({t: 'c', i1: i, i2: j});
+            pairs1.push({t: 'r', i1: i, i2: j});
+            pairs1.push({t: 'c', i1: i, i2: j});
         }
+        pairs2.push({t: 'r', i1: i, i2: i + 1});
+        pairs2.push({t: 'c', i1: i, i2: i + 1});
     }
 
     var valid1 = [];
@@ -16,16 +23,27 @@ var movesToChessboard = function(board) {
     var val1 = 1;
     var val2 = 0;
 
+    var number1 = 0;
+    var number0 = 0;
+
     for (let i = 0; i < board.length; i++) {
         valid1.push([]);
         valid2.push([]);
+
         for (let j = 0; j < board[i].length; j++) {
             valid1[i].push(val1);
             valid2[i].push(val2);
             let val = val1;
             val1 = val2;
             val2 = val;
+
+            if (board[i][j] === 0) {
+                number0++;
+            } else {
+                number1++;
+            }
         }
+
         if (board[i].length % 2 === 0) {
             let val = val1;
             val1 = val2;
@@ -39,31 +57,54 @@ var movesToChessboard = function(board) {
 
     var minSwapsNumber = -1;
 
-    var time = new Date().getTime();
+    var pairsList = [pairs2, pairs1];
 
-    var maxSwapNumbers = Math.min(5, board.length - 1);
+    for (var pairsIndex = 0; pairsIndex < pairsList.length; pairsIndex++) {
 
-    getSwapsList(pairs.length, maxSwapNumbers,
-        (index, swapNumbers, swaps) => {
-            swap(board, pairs[index]);
+        var time = new Date().getTime();
 
-            if (areSame(board, valid1) || areSame(board, valid2)) {
-                console.log(new Date().getTime() - time, swaps);
+        var pairs = pairsList[pairsIndex];
 
-                if (minSwapsNumber === -1 || minSwapsNumber > swapNumbers) {
-                    minSwapsNumber = swapNumbers;
+        var maxSwapNumbers = pairsIndex === 0 ? 7 : 5;
+
+        var timeOut = pairsIndex === 0 ? 50 : 5000
+
+        getSwapsList(pairs.length, maxSwapNumbers,
+            (index, swapNumbers, swaps, ctx) => {
+                swap(board, pairs[index]);
+
+                if ((board[0][0] === 1 && areSame(board, valid1))
+                    || (board[0][0] === 0 && areSame(board, valid2))) {
+
+                    if (minSwapsNumber === -1 || minSwapsNumber > swapNumbers) {
+                        minSwapsNumber = swapNumbers;
+                    }
+
+                    maxSwapNumbers--;
+
+                    console.log(maxSwapNumbers, minSwapsNumber, pairsIndex);
+
+                    return true;
                 }
 
-                return true;
-            }
+                if (new Date().getTime() - time >= timeOut) {
+                    console.log(maxSwapNumbers, minSwapsNumber, pairsIndex, 'timeout');
+                    ctx.terminate = true;
+                    return true;
+                }
 
-            return new Date().getTime() - time >= 5000;
-        },
-        (index) => {
-            swap(board, pairs[index]);
-        });
+                return false;
+            },
+            (index) => {
+                swap(board, pairs[index]);
+            });
 
-    console.log(new Date().getTime() - time);
+
+        console.log(pairsIndex, new Date().getTime() - time)
+
+    }
+
+    console.log(new Date().getTime() - totalTime);
 
     return minSwapsNumber;
 }
@@ -78,23 +119,31 @@ var areSame = function (board1, board2) {
 }
 
 var getSwapsList = function(length,swapsNumber,doSwap,undoSwap) {
-    return swapsListRecursion(length, swapsNumber, doSwap, undoSwap, 1, {threshold:0},[]);
+    return swapsListRecursion(0, length, swapsNumber, doSwap, undoSwap, 1, {threshold:0},[]);
 }
 
-var swapsListRecursion = function(length,swapsNumber,doSwap, undoSwap, level,ctx,swaps) {
+var swapsListRecursion = function(start, length,swapsNumber,doSwap, undoSwap, level,ctx,swaps) {
     for (var i = 0; i < length; i++) {
+        if (swapsNumber <= ctx.threshold) {
+            break;
+        }
         if (swaps.length > 0 && swaps[swaps.length - 1] >= i) {
             continue;
         }
         swaps.push(i)
-        if (doSwap(i, level, swaps)) {
+        var callCtx = {terminate: false};
+        if (doSwap(i, level, swaps, callCtx)) {
+            if (callCtx.terminate) {
+                ctx.threshold = 100;
+                break;
+            }
             ctx.threshold++;
             undoSwap(i);
             swaps.length -= 1;
             break;
         }
         if (swapsNumber - 1 > ctx.threshold) {
-            swapsListRecursion(length, swapsNumber - 1, doSwap, undoSwap, level + 1, ctx, swaps);
+            swapsListRecursion(start + 1, length, swapsNumber - 1, doSwap, undoSwap, level + 1, ctx, swaps);
         }
         swaps.length -= 1;
         undoSwap(i);
@@ -164,10 +213,23 @@ var test6 = [[0,1,1,0,0,1,1,1,0],[0,1,1,1,0,0,1,0,1],[0,1,1,0,0,1,1,1,0],[0,1,1,
 
 var test7 = [[0,1,0,0,1,1,1,0,0,1],[1,0,1,1,0,0,0,1,1,0],[0,1,0,0,1,1,1,0,0,1],[0,1,0,0,1,1,1,0,0,1],
     [1,0,1,1,0,0,0,1,1,0],[1,0,1,1,0,0,0,1,1,0],[1,0,1,1,0,0,0,1,1,0],[1,0,1,1,0,0,0,1,1,0],
-    [0,1,0,0,1,1,1,0,0,1],[0,1,0,0,1,1,1,0,0,1]];
+    [0,1,0,0,1,1,1,0,0,1],[0,1,0,0,1,1,1,0,0,1]];//5
 
 var test8 = [[1,0,1,0,1,0,0,0,1,1,0],[1,0,1,0,1,0,0,0,1,1,0],[0,1,0,1,0,1,1,1,0,0,1],[0,1,0,1,0,1,1,1,0,0,1],
     [1,0,1,0,1,0,0,0,1,1,0],[0,1,0,1,0,1,1,1,0,0,1],[0,1,0,1,0,1,1,1,0,0,1],[1,0,1,0,1,0,0,0,1,1,0],
-    [1,0,1,0,1,0,0,0,1,1,0],[1,0,1,0,1,0,0,0,1,1,0],[0,1,0,1,0,1,1,1,0,0,1]]
+    [1,0,1,0,1,0,0,0,1,1,0],[1,0,1,0,1,0,0,0,1,1,0],[0,1,0,1,0,1,1,1,0,0,1]];//7
 
-console.log(movesToChessboard(test8));
+var test9 = [[0,0,1,0,1,1],[1,1,0,1,0,0],[1,1,0,1,0,0],[0,0,1,0,1,1],[1,1,0,1,0,0],[0,0,1,0,1,1]];//2
+
+var test10 = [[0,1,0,1,1,0,1,0,0],[1,0,1,0,0,1,0,1,1],[1,0,1,0,0,1,0,1,1],[0,1,0,1,1,0,1,0,0],
+    [0,1,0,1,1,0,1,0,0],[0,1,0,1,1,0,1,0,0],[1,0,1,0,0,1,0,1,1],[1,0,1,0,0,1,0,1,1],[0,1,0,1,1,0,1,0,0]]//4
+
+var test11 = [[0,1,0,0,1,1,1,0,0,1],[1,0,1,1,0,0,0,1,1,0],[0,1,0,0,1,1,1,0,0,1],[0,1,0,0,1,1,1,0,0,1],
+    [1,0,1,1,0,0,0,1,1,0],[1,0,1,1,0,0,0,1,1,0],[1,0,1,1,0,0,0,1,1,0],[1,0,1,1,0,0,0,1,1,0],
+    [0,1,0,0,1,1,1,0,0,1],[0,1,0,0,1,1,1,0,0,1]]//4
+
+var test12 = [[0,0,0,0,1,1,0,1,0,1,1],[1,1,1,1,0,0,1,0,1,0,0],[1,1,1,1,0,0,1,0,1,0,0],
+    [0,0,0,0,1,1,0,1,0,1,1],[0,0,0,0,1,1,0,1,0,1,1],[1,1,1,1,0,0,1,0,1,0,0],[1,1,1,1,0,0,1,0,1,0,0],
+    [1,1,1,1,0,0,1,0,1,0,0],[0,0,0,0,1,1,0,1,0,1,1],[1,1,1,1,0,0,1,0,1,0,0],[0,0,0,0,1,1,0,1,0,1,1]];//-1
+
+console.log(movesToChessboard(test12));

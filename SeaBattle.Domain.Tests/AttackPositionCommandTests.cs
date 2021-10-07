@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NUnit.Framework;
 using SeaBattle.Domain.Builders;
@@ -123,17 +124,18 @@ namespace SeaBattle.Domain.Tests
                 .WithShipAtPosition(0, 0, 3)
                 .WithShipAtPosition(4, 0, 2)
                 .Build();
+            var fieldId = Guid.NewGuid();
 
             // Act
-            new AttackByPositionCommand(0, 0, field.FieldId)
+            new AttackByPositionCommand(0, 0, fieldId)
                 .Execute(field, out _);
-            new AttackByPositionCommand(0, 1, field.FieldId)
+            new AttackByPositionCommand(0, 1, fieldId)
                 .Execute(field, out _);
-            new AttackByPositionCommand(0, 2, field.FieldId)
+            new AttackByPositionCommand(0, 2, fieldId)
                 .Execute(field, out _);
             
             
-            new AttackByPositionCommand(4, 0, field.FieldId)
+            new AttackByPositionCommand(4, 0, fieldId)
                 .Execute(field, out _);
 
             // Assert

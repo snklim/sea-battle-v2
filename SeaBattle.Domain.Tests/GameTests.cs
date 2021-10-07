@@ -64,5 +64,39 @@ namespace SeaBattle.Domain.Tests
             // Assert
             Assert.AreEqual(9, cells.Length);
         }
+
+        [Test]
+        public void HitTheShipCell_NextPositionGenerated()
+        {
+            // Arrange
+            var game = new GameBuilder()
+                .WithFieldSize(3, 4)
+                .WithShipAtPositionOnDefenderField(1, 1, 2, Orientation.Horizontal)
+                .Build();
+            
+            // Act
+            game.Next(new AttackByPositionCommand(1, 1, game.AttackerField.FieldId));
+            
+            // Assert
+            Assert.IsNotEmpty(game.DefenderField.NextPositions);
+            Assert.IsEmpty(game.AttackerField.NextPositions);
+        }
+        
+        [Test]
+        public void MissedTheShipCell_NextPositionNotGenerated()
+        {
+            // Arrange
+            var game = new GameBuilder()
+                .WithFieldSize(3, 4)
+                .WithShipAtPositionOnDefenderField(1, 1, 2, Orientation.Horizontal)
+                .Build();
+            
+            // Act
+            game.Next(new AttackByPositionCommand(0, 0, game.AttackerField.FieldId));
+            
+            // Assert
+            Assert.IsEmpty(game.DefenderField.NextPositions);
+            Assert.IsEmpty(game.AttackerField.NextPositions);
+        }
     }
 }
