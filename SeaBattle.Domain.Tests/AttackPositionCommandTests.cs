@@ -95,7 +95,7 @@ namespace SeaBattle.Domain.Tests
 
             // Act
             new AttackByRandomPositionCommand(attacker.PlayerId)
-                .Execute(attacker, defender, out var affectedCell);
+                .Execute(attacker, defender, out var changesList);
 
             // Assert
             Assert.IsTrue(new[]
@@ -103,7 +103,9 @@ namespace SeaBattle.Domain.Tests
                 (x: 0, y: 1),
                 (x: 1, y: 0), (x: 1, y: 2),
                 (x: 2, y: 1)
-            }.Intersect(affectedCell.Select(cell => (x: cell.X, y: cell.Y))).Any());
+            }.Intersect(changesList
+                .First(changes => changes.PlayerId == defender.PlayerId && changes.FieldId == defender.OwnField.FieldId)
+                .AffectedCells.Select(cell => (x: cell.X, y: cell.Y))).Any());
         }
 
         [Test]

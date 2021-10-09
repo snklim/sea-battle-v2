@@ -10,14 +10,14 @@ namespace SeaBattle.Domain
     {
         public Player Attacker { get; set; }
         public Player Defender { get; set; }
-        public IEnumerable<Cell> Next(AttackPositionCommand command)
+        public IReadOnlyCollection<Changes> Next(AttackPositionCommand command)
         {
-            if (!command.Execute(Attacker, Defender, out var affectedCells))
+            if (!command.Execute(Attacker, Defender, out var changesList))
             {
                 (Attacker, Defender) = (Defender, Attacker);
             }
 
-            return affectedCells;
+            return changesList;
         }
 
         public bool GameIsOver => Attacker.OwnField.AllShipsDestroyed || Defender.OwnField.AllShipsDestroyed;

@@ -15,36 +15,41 @@ namespace SeaBattle.Domain
         public List<(int x, int y)> NextPositions { get; } = new();
         public List<(int x, int y)> PreviousHits { get; } = new();
 
-        public bool Attack(Player defender, int posX, int posY, out IEnumerable<Cell> affectedCells)
+        public bool Attack(Player defender, int posX, int posY, out IReadOnlyCollection<Changes> changesList)
         {
-            var hit = defender.Defend(posX, posY, out var affectedCell, out var affectedCellList);
+            var hit = defender.Defend(posX, posY, out var affectedCell, out var enemyChanges);
 
             var enemyAffectedCellList = new List<Cell>();
 
-            affectedCellList
-                .ForEach(cell =>
-                {
-                    var pos = (x: cell.X, y: cell.Y);
-                    NextPositions.Remove(pos);
-                    PreviousHits.Remove(pos);
-                    var enemyAffectedCell = cell.CellType == CellType.Ship
-                        ? new ShipCell(cell.X, cell.Y, EnemyField.FieldId, new ShipDetails())
-                        : cell.CellType == CellType.Border
-                            ? new BorderCell(cell.X, cell.Y, EnemyField.FieldId)
-                            : EnemyField[cell.X, cell.Y];
-                    enemyAffectedCell.Attacked = true;
-                    EnemyField[cell.X, cell.Y] = enemyAffectedCell;
-                    enemyAffectedCellList.Add(enemyAffectedCell);
-                });
+            enemyChanges.AffectedCells.ToList().ForEach(cell =>
+            {
+                var pos = (x: cell.X, y: cell.Y);
+                NextPositions.Remove(pos);
+                PreviousHits.Remove(pos);
+                var enemyAffectedCell = cell.CellType == CellType.Ship
+                    ? new ShipCell(cell.X, cell.Y, EnemyField.FieldId, new ShipDetails())
+                    : cell.CellType == CellType.Border
+                        ? new BorderCell(cell.X, cell.Y, EnemyField.FieldId)
+                        : EnemyField[cell.X, cell.Y];
+                enemyAffectedCell.Attacked = true;
+                EnemyField[cell.X, cell.Y] = enemyAffectedCell;
+                enemyAffectedCellList.Add(enemyAffectedCell);
+            });
 
             if (hit && !affectedCell.IsShipDestroyed)
             {
                 GenerateNextPositions(posX, posY);
             }
 
-            affectedCellList.AddRange(enemyAffectedCellList);
-
-            affectedCells = affectedCellList.ToArray();
+            changesList = new[]
+            {
+                enemyChanges, new Changes
+                {
+                    PlayerId = PlayerId,
+                    FieldId = EnemyField.FieldId,
+                    AffectedCells = enemyAffectedCellList.ToArray()
+                }
+            };
 
             return hit;
         }
@@ -79,10 +84,15 @@ namespace SeaBattle.Domain
             }
         }
 
-        private bool Defend(int posX, int posY, out Cell affectedCell, out List<Cell> affectedCells)
+        private bool Defend(int posX, int posY, out Cell affectedCell, out Changes changes)
         {
             affectedCell = OwnField[posX, posY];
-            affectedCells = affectedCell.Attack().ToList();
+            changes = new Changes
+            {
+                PlayerId = PlayerId,
+                FieldId = OwnField.FieldId,
+                AffectedCells = affectedCell.Attack().ToArray()
+            };
             return affectedCell.CellType == CellType.Ship;
         }
         

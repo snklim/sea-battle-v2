@@ -14,22 +14,22 @@ namespace SeaBattle.Domain.Commands
 
         }
 
-        protected override bool ExecuteInternal(Player attacker, Player defender, out IEnumerable<Cell> affectedCell)
+        protected override bool ExecuteInternal(Player attacker, Player defender, out IReadOnlyCollection<Changes> changesList)
         {   
             if (attacker.NextPositions.Any())
             {
                 var position = attacker.NextPositions[Rnd.Next(attacker.NextPositions.Count)];
-                return attacker.Attack(defender, position.x, position.y, out affectedCell);
+                return attacker.Attack(defender, position.x, position.y, out changesList);
             }
 
             var availablePositions = attacker.AvailablePositions;
             if (availablePositions.Any())
             {
                 var position = availablePositions[Rnd.Next(availablePositions.Count)];
-                return attacker.Attack(defender, position.x, position.y, out affectedCell);
+                return attacker.Attack(defender, position.x, position.y, out changesList);
             }
 
-            affectedCell = Enumerable.Empty<Cell>();
+            changesList = Array.Empty<Changes>();
 
             return false;
         }

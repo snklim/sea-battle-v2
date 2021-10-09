@@ -19,50 +19,78 @@ namespace SeaBattle.Main
                 .Build();
 
             Console.Clear();
-            Print(game.Attacker.OwnField.GetCells());
-            Print(game.Attacker.EnemyField.GetCells());
-            Print(game.Defender.OwnField.GetCells());
-            Print(game.Defender.EnemyField.GetCells());
+            Print(new[]
+            {
+                new Changes
+                {
+                    PlayerId = game.Attacker.PlayerId,
+                    FieldId = game.Attacker.OwnField.FieldId,
+                    AffectedCells = game.Attacker.OwnField.GetCells().ToArray()
+                },
+                new Changes
+                {
+                    PlayerId = game.Attacker.PlayerId,
+                    FieldId = game.Attacker.EnemyField.FieldId,
+                    AffectedCells = game.Attacker.EnemyField.GetCells().ToArray()
+                },
+                new Changes
+                {
+                    PlayerId = game.Defender.PlayerId,
+                    FieldId = game.Defender.OwnField.FieldId,
+                    AffectedCells = game.Defender.OwnField.GetCells().ToArray()
+                },
+                new Changes
+                {
+                    PlayerId = game.Defender.PlayerId,
+                    FieldId = game.Defender.EnemyField.FieldId,
+                    AffectedCells = game.Defender.EnemyField.GetCells().ToArray()
+                }
+            });
 
             while (!game.GameIsOver)
             {
                 Console.ReadLine();
             
-                var affectedCells = game.Next(new AttackByRandomPositionCommand(game.Attacker.PlayerId)).ToArray();
-                Print(affectedCells);
+                var changesList = game.Next(new AttackByRandomPositionCommand(game.Attacker.PlayerId)).ToArray();
+                Print(changesList);
             
                 Console.SetCursorPosition(0, 22);
             }
         }
 
-        static void Print(IEnumerable<Cell> cells)
+        static void Print(IReadOnlyCollection<Changes> changesList)
         {
-            foreach (var cell in cells)
+            foreach (var changes in changesList)
             {
-                if (!ShiftPerField.TryGetValue(cell.FieldId, out var shift))
+                var key = $"{changes.PlayerId}_{changes.FieldId}";
+                if (!ShiftPerField.TryGetValue(key, out var shift))
                 {
                     var shiftX = 11 * (ShiftPerField.Count / 2);
                     var shiftY = 11 * (ShiftPerField.Count % 2);
                     shift = (shiftX, shiftY);
-                    ShiftPerField.Add(cell.FieldId, shift);
+                    ShiftPerField.Add(key, shift);
                 }
 
-                Console.SetCursorPosition(cell.Y + shift.shiftY, cell.X + shift.shiftX);
-                if (cell.Attacked)
+                foreach (var cell in changes.AffectedCells)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.SetCursorPosition(cell.Y + shift.shiftY, cell.X + shift.shiftX);
+                    if (cell.Attacked)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        Console.ResetColor();
+                    }
+
+                    if (cell.CellType == CellType.Ship)
+                        Console.Write('O');
+                    else
+                        Console.Write('~');
                 }
-                else
-                {
-                    Console.ResetColor();
-                }
-                if (cell.CellType == CellType.Ship)
-                    Console.Write('O');
-                else
-                    Console.Write('~');
             }
         }
 
-        private static readonly Dictionary<Guid, (int shiftX, int shiftY)> ShiftPerField = new ();
+        private static readonly Dictionary<string, (int shiftX, int shiftY)> ShiftPerField = new ();
     }
 }

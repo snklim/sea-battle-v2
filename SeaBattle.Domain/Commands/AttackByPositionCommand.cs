@@ -16,9 +16,9 @@ namespace SeaBattle.Domain.Commands
             _positionY = positionY;
         }
 
-        protected override bool ExecuteInternal(Player attacker, Player defender, out IEnumerable<Cell> affectedCell)
+        protected override bool ExecuteInternal(Player attacker, Player defender, out IReadOnlyCollection<Changes> changesList)
         {
-            return attacker.Attack(defender, _positionX, _positionY, out affectedCell);
+            return attacker.Attack(defender, _positionX, _positionY, out changesList);
         }
     }
 }

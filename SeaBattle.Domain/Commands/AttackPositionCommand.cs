@@ -15,17 +15,17 @@ namespace SeaBattle.Domain.Commands
             AttackerId = attackerId;
         }
 
-        public bool Execute(Player attacker, Player defender, out IEnumerable<Cell> affectedCell)
+        public bool Execute(Player attacker, Player defender, out IReadOnlyCollection<Changes> changesList)
         {
             if (attacker.PlayerId != AttackerId)
             {
-                affectedCell = ImmutableArray<Cell>.Empty;
+                changesList = Array.Empty<Changes>();
                 return true;
             }
 
-            return ExecuteInternal(attacker, defender, out affectedCell);
+            return ExecuteInternal(attacker, defender, out changesList);
         }
 
-        protected abstract bool ExecuteInternal(Player attacker, Player defender, out IEnumerable<Cell> affectedCell);
+        protected abstract bool ExecuteInternal(Player attacker, Player defender, out IReadOnlyCollection<Changes> changesList);
     }
 }

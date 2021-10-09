@@ -29,5 +29,14 @@ namespace SeaBattle.Domain.Cells
         public int X { get; }
         public int Y { get; }
         public CellType CellType { get; }
+
+        public CellDto ToCellDto()
+        {
+            return CellType == CellType.Ship
+                ? new CellDto {X = X, Y = Y, Attacked = true, CellType = CellType.Ship}
+                : CellType == CellType.Border
+                    ? new CellDto {X = X, Y = Y, Attacked = true, CellType = CellType.Border}
+                    : new CellDto {X = X, Y = Y, Attacked = true, CellType = CellType.Empty};
+        }
     }
 }
