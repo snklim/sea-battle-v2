@@ -8,18 +8,18 @@ namespace SeaBattle.Domain
 {
     public class Game
     {
-        public Field AttackerField { get; set; }
-        public Field DefenderField { get; set; }
+        public Player Attacker { get; set; }
+        public Player Defender { get; set; }
         public IEnumerable<Cell> Next(AttackPositionCommand command)
         {
-            if (!command.Execute(DefenderField, out var affectedCells))
+            if (!command.Execute(Attacker, Defender, out var affectedCells))
             {
-                (AttackerField, DefenderField) = (DefenderField, AttackerField);
+                (Attacker, Defender) = (Defender, Attacker);
             }
 
             return affectedCells;
         }
 
-        public bool GameIsOver => AttackerField.AllShipsDestroyed || DefenderField.AllShipsDestroyed;
+        public bool GameIsOver => Attacker.OwnField.AllShipsDestroyed || Defender.OwnField.AllShipsDestroyed;
     }
 }

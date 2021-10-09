@@ -6,13 +6,13 @@ namespace SeaBattle.Domain.Builders
     public class GameBuilder
     {
         private Game _game;
-        private FieldBuilder _attackerFieldBuilder;
-        private FieldBuilder _defenderFieldBuilder;
+        private PlayerBuilder _attackerBuilder;
+        private PlayerBuilder _defenderBuilder;
 
         public GameBuilder WithFieldSize(int sizeX, int sizeY)
         {
-            _attackerFieldBuilder = new FieldBuilder().WithSize(sizeX, sizeY);
-            _defenderFieldBuilder = new FieldBuilder().WithSize(sizeX, sizeY);
+            _attackerBuilder = new PlayerBuilder().WithField(sizeX, sizeY);
+            _defenderBuilder = new PlayerBuilder().WithField(sizeX, sizeY);
             return this;
         }
 
@@ -20,8 +20,8 @@ namespace SeaBattle.Domain.Builders
         {
             foreach (var ship in ships)
             {
-                _attackerFieldBuilder.WithShip(ship);
-                _defenderFieldBuilder.WithShip(ship);
+                _attackerBuilder.WithShip(ship);
+                _defenderBuilder.WithShip(ship);
             }
 
             return this;
@@ -29,13 +29,13 @@ namespace SeaBattle.Domain.Builders
 
         public GameBuilder WithShipAtPositionOnAttackerField(int x, int y, int length, Orientation orientation)
         {
-            _attackerFieldBuilder.WithShipAtPosition(x, y, length, orientation);
+            _attackerBuilder.WithShipAtPos(x, y, length, orientation);
             return this;
         }
         
         public GameBuilder WithShipAtPositionOnDefenderField(int x, int y, int length, Orientation orientation)
         {
-            _defenderFieldBuilder.WithShipAtPosition(x, y, length, orientation);
+            _defenderBuilder.WithShipAtPos(x, y, length, orientation);
             return this;
         }
 
@@ -43,8 +43,8 @@ namespace SeaBattle.Domain.Builders
         {
             _game = new Game
             {
-                AttackerField = _attackerFieldBuilder.Build(),
-                DefenderField = _defenderFieldBuilder.Build()
+                Attacker = _attackerBuilder.Build(),
+                Defender = _defenderBuilder.Build()
             };
             return _game;
         }

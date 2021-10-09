@@ -9,24 +9,24 @@ namespace SeaBattle.Domain.Commands
     {
         private static readonly Random Rnd = new Random();
 
-        public AttackByRandomPositionCommand(Guid attackerFieldId) : base(attackerFieldId)
+        public AttackByRandomPositionCommand(Guid attackerId) : base(attackerId)
         {
 
         }
 
-        protected override bool ExecuteInternal(Field field, out IEnumerable<Cell> affectedCell)
+        protected override bool ExecuteInternal(Player attacker, Player defender, out IEnumerable<Cell> affectedCell)
         {   
-            if (field.NextPositions.Any())
+            if (attacker.NextPositions.Any())
             {
-                var position = field.NextPositions[Rnd.Next(field.NextPositions.Count)];
-                return field.Attack(position.x, position.y, out affectedCell);
+                var position = attacker.NextPositions[Rnd.Next(attacker.NextPositions.Count)];
+                return attacker.Attack(defender, position.x, position.y, out affectedCell);
             }
 
-            var availablePositions = field.AvailablePositions;
+            var availablePositions = attacker.AvailablePositions;
             if (availablePositions.Any())
             {
                 var position = availablePositions[Rnd.Next(availablePositions.Count)];
-                return field.Attack(position.x, position.y, out affectedCell);
+                return attacker.Attack(defender, position.x, position.y, out affectedCell);
             }
 
             affectedCell = Enumerable.Empty<Cell>();

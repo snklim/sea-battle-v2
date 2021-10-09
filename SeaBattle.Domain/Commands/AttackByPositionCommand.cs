@@ -10,15 +10,15 @@ namespace SeaBattle.Domain.Commands
         private readonly int _positionX;
         private readonly int _positionY;
 
-        public AttackByPositionCommand(int positionX, int positionY, Guid attackerFieldId) : base(attackerFieldId)
+        public AttackByPositionCommand(int positionX, int positionY, Guid attackerId) : base(attackerId)
         {
             _positionX = positionX;
             _positionY = positionY;
         }
 
-        protected override bool ExecuteInternal(Field field, out IEnumerable<Cell> affectedCell)
+        protected override bool ExecuteInternal(Player attacker, Player defender, out IEnumerable<Cell> affectedCell)
         {
-            return field.Attack(_positionX, _positionY, out affectedCell);
+            return attacker.Attack(defender, _positionX, _positionY, out affectedCell);
         }
     }
 }

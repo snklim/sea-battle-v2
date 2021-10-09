@@ -8,24 +8,24 @@ namespace SeaBattle.Domain.Commands
 {
     public abstract class AttackPositionCommand
     {
-        private Guid AttackerFieldId { get; }
+        public Guid AttackerId { get; }
 
-        protected AttackPositionCommand(Guid attackerFieldId)
+        protected AttackPositionCommand(Guid attackerId)
         {
-            AttackerFieldId = attackerFieldId;
+            AttackerId = attackerId;
         }
 
-        public bool Execute(Field defenderField, out IEnumerable<Cell> affectedCell)
+        public bool Execute(Player attacker, Player defender, out IEnumerable<Cell> affectedCell)
         {
-            if (defenderField.FieldId == AttackerFieldId)
+            if (attacker.PlayerId != AttackerId)
             {
                 affectedCell = ImmutableArray<Cell>.Empty;
                 return true;
             }
 
-            return ExecuteInternal(defenderField, out affectedCell);
+            return ExecuteInternal(attacker, defender, out affectedCell);
         }
 
-        protected abstract bool ExecuteInternal(Field field, out IEnumerable<Cell> affectedCell);
+        protected abstract bool ExecuteInternal(Player attacker, Player defender, out IEnumerable<Cell> affectedCell);
     }
 }

@@ -19,14 +19,17 @@ namespace SeaBattle.Domain.Tests
             // Arrange
             var game = new GameBuilder()
                 .WithFieldSize(5, 5)
-                .WithShipAtPositionOnAttackerField(2, 2, 1, Orientation.Horizontal)
+                .WithShipAtPositionOnDefenderField(2, 2, 1, Orientation.Horizontal)
                 .Build();
+            var attackerFieldId = game.Attacker.EnemyField.FieldId;
+            var defenderFieldId = game.Defender.OwnField.FieldId;
 
             // Act
-            var cells = game.Next(new AttackByPositionCommand(0,0, game.AttackerField.FieldId)).ToArray();
+            var cells = game.Next(new AttackByPositionCommand(0,0, game.Attacker.PlayerId)).ToArray();
 
             // Assert
-            Assert.AreEqual(1, cells.Length);
+            Assert.AreEqual(1, cells.Count(cell => cell.FieldId == defenderFieldId));
+            Assert.AreEqual(1, cells.Count(cell => cell.FieldId == attackerFieldId));
             Assert.AreEqual(CellType.Empty, cells[0].CellType);
         }
         
@@ -39,12 +42,15 @@ namespace SeaBattle.Domain.Tests
                 .WithShipAtPositionOnAttackerField(2, 2, 2, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(2, 2, 2, Orientation.Horizontal)
                 .Build();
+            var attackerFieldId = game.Attacker.EnemyField.FieldId;
+            var defenderFieldId = game.Defender.OwnField.FieldId;
 
             // Act
-            var cells = game.Next(new AttackByPositionCommand(2, 2, game.AttackerField.FieldId)).ToArray();
+            var cells = game.Next(new AttackByPositionCommand(2, 2, game.Attacker.PlayerId)).ToArray();
 
             // Assert
-            Assert.AreEqual(1, cells.Length);
+            Assert.AreEqual(1, cells.Count(cell => cell.FieldId == attackerFieldId));
+            Assert.AreEqual(1, cells.Count(cell => cell.FieldId == defenderFieldId));
             Assert.AreEqual(CellType.Ship, cells[0].CellType);
         }
         
@@ -57,12 +63,15 @@ namespace SeaBattle.Domain.Tests
                 .WithShipAtPositionOnAttackerField(2, 2, 1, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(2, 2, 1, Orientation.Horizontal)
                 .Build();
+            var attackerFieldId = game.Attacker.EnemyField.FieldId;
+            var defenderFieldId = game.Defender.OwnField.FieldId;
 
             // Act
-            var cells = game.Next(new AttackByPositionCommand(2,2, game.AttackerField.FieldId)).ToArray();
+            var cells = game.Next(new AttackByPositionCommand(2,2, game.Attacker.PlayerId)).ToArray();
 
             // Assert
-            Assert.AreEqual(9, cells.Length);
+            Assert.AreEqual(9, cells.Count(cell => cell.FieldId == attackerFieldId));
+            Assert.AreEqual(9, cells.Count(cell => cell.FieldId == defenderFieldId));
         }
 
         [Test]
@@ -75,11 +84,11 @@ namespace SeaBattle.Domain.Tests
                 .Build();
             
             // Act
-            game.Next(new AttackByPositionCommand(1, 1, game.AttackerField.FieldId));
+            game.Next(new AttackByPositionCommand(1, 1, game.Attacker.PlayerId));
             
             // Assert
-            Assert.IsNotEmpty(game.DefenderField.NextPositions);
-            Assert.IsEmpty(game.AttackerField.NextPositions);
+            Assert.IsNotEmpty(game.Attacker.NextPositions);
+            Assert.IsEmpty(game.Defender.NextPositions);
         }
         
         [Test]
@@ -92,11 +101,11 @@ namespace SeaBattle.Domain.Tests
                 .Build();
             
             // Act
-            game.Next(new AttackByPositionCommand(0, 0, game.AttackerField.FieldId));
+            game.Next(new AttackByPositionCommand(0, 0, game.Attacker.PlayerId));
             
             // Assert
-            Assert.IsEmpty(game.DefenderField.NextPositions);
-            Assert.IsEmpty(game.AttackerField.NextPositions);
+            Assert.IsEmpty(game.Defender.NextPositions);
+            Assert.IsEmpty(game.Attacker.NextPositions);
         }
     }
 }
