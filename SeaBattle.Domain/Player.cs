@@ -26,11 +26,7 @@ namespace SeaBattle.Domain
                 var pos = (x: cell.X, y: cell.Y);
                 NextPositions.Remove(pos);
                 PreviousHits.Remove(pos);
-                var enemyAffectedCell = cell.CellType == CellType.Ship
-                    ? new ShipCell(cell.X, cell.Y, EnemyField.FieldId, new ShipDetails())
-                    : cell.CellType == CellType.Border
-                        ? new BorderCell(cell.X, cell.Y, EnemyField.FieldId)
-                        : EnemyField[cell.X, cell.Y];
+                var enemyAffectedCell = cell.ToCell();
                 enemyAffectedCell.Attacked = true;
                 EnemyField[cell.X, cell.Y] = enemyAffectedCell;
                 enemyAffectedCellList.Add(enemyAffectedCell);
@@ -47,7 +43,7 @@ namespace SeaBattle.Domain
                 {
                     PlayerId = PlayerId,
                     FieldId = EnemyField.FieldId,
-                    AffectedCells = enemyAffectedCellList.ToArray()
+                    AffectedCells = enemyAffectedCellList.Select(cell=>cell.ToCellDto()).ToArray()
                 }
             };
 
@@ -72,7 +68,7 @@ namespace SeaBattle.Domain
             if (PreviousHits.Count >= 2)
             {
                 var positionPairs = PreviousHits
-                    .Join(PreviousHits, pos => true, pos => true,
+                    .Join(PreviousHits, _ => true, _ => true,
                         (pos1, pos2) => (pos1, pos2))
                     .ToList();
                 var filteredNextPositions = positionPairs.All(x => x.pos1.x == x.pos2.x)
@@ -84,15 +80,16 @@ namespace SeaBattle.Domain
             }
         }
 
-        private bool Defend(int posX, int posY, out Cell affectedCell, out Changes changes)
+        private bool Defend(int posX, int posY, out CellDto affectedCellDto, out Changes changes)
         {
-            affectedCell = OwnField[posX, posY];
+            var affectedCell = OwnField[posX, posY];
             changes = new Changes
             {
                 PlayerId = PlayerId,
                 FieldId = OwnField.FieldId,
-                AffectedCells = affectedCell.Attack().ToArray()
+                AffectedCells = affectedCell.Attack().Select(cell=>cell.ToCellDto()).ToArray()
             };
+            affectedCellDto = affectedCell.ToCellDto();
             return affectedCell.CellType == CellType.Ship;
         }
         

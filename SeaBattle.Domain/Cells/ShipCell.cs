@@ -7,7 +7,7 @@ namespace SeaBattle.Domain.Cells
 {
     public class ShipCell : Cell
     {
-        public ShipCell(int x, int y, Guid fieldId, ShipDetails shipDetails) : base(x, y, CellType.Ship, fieldId)
+        public ShipCell(int x, int y, ShipDetails shipDetails) : base(x, y, CellType.Ship)
         {
             ShipDetails = shipDetails;
         }
@@ -41,6 +41,6 @@ namespace SeaBattle.Domain.Cells
 
         private ShipDetails ShipDetails { get; }
 
-        public override bool IsShipDestroyed => ShipDetails.CellsAlive == 0;
+        protected override bool IsShipDestroyed => ShipDetails.CellsAlive == 0;
     }
 }

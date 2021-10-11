@@ -11,7 +11,7 @@ namespace SeaBattle.Domain.Builders
         private Field _field;
         private List<(int x, int y)> _availablePositions;
 
-        private readonly Random _random = new Random();
+        private readonly Random _random = new ();
         private readonly Orientation[] _orientations = {Orientation.Horizontal, Orientation.Vertical};
 
         public FieldBuilder WithSize(int sizeX, int sizeY)
@@ -24,7 +24,7 @@ namespace SeaBattle.Domain.Builders
         public FieldBuilder WithShip(int length)
         {
             var allCombinations = _availablePositions
-                .Join(_orientations, position => true, orientation => true,
+                .Join(_orientations, _ => true, _ => true,
                     (position, orientation) => (position, orientation))
                 .ToList();
             while (allCombinations.Count > 0)
@@ -62,14 +62,14 @@ namespace SeaBattle.Domain.Builders
             var shipDetails = new ShipDetails();
             border.ForEach(cell =>
             {
-                var borderCell = new BorderCell(cell.x, cell.y, _field.FieldId);
+                var borderCell = new BorderCell(cell.x, cell.y);
                 _field[cell.x, cell.y] = borderCell;
                 shipDetails.Border.Add(borderCell);
                 _availablePositions.Remove(cell);
             });
             ship.ForEach(cell =>
             {
-                var shipCell = new ShipCell(cell.x, cell.y, _field.FieldId, shipDetails);
+                var shipCell = new ShipCell(cell.x, cell.y, shipDetails);
                 _field[cell.x, cell.y] = shipCell;
                 shipDetails.Ship.Add(shipCell);
                 _availablePositions.Remove(cell);
@@ -100,8 +100,8 @@ namespace SeaBattle.Domain.Builders
         {
             return Enumerable.Range(startX, lengthX)
                 .Join(Enumerable.Range(startY, lengthY),
-                    x => true,
-                    y => true,
+                    _ => true,
+                    _ => true,
                     (x, y) => (x, y));
         }
 

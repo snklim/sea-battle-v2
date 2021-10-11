@@ -6,8 +6,8 @@ namespace SeaBattle.Domain
 {
     public class ShipDetails
     {
-        public List<BorderCell> Border { get; } = new List<BorderCell>();
-        public List<ShipCell> Ship { get; } = new List<ShipCell>();
+        public List<BorderCell> Border { get; } = new ();
+        public List<ShipCell> Ship { get; } = new ();
         public int CellsAlive => Ship.Count(cell => !cell.Attacked);
     }
 }

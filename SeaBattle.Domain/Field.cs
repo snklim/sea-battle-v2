@@ -21,7 +21,7 @@ namespace SeaBattle.Domain
             for (var x = 0; x < sizeX; x++)
             for (var y = 0; y < sizeY; y++)
             {
-                Cells[x, y] = new EmptyCell(x, y, FieldId);
+                Cells[x, y] = new EmptyCell(x, y);
             }
         }
         
@@ -53,12 +53,12 @@ namespace SeaBattle.Domain
             return 0 <= x && x < SizeX && 0 <= y && y < SizeY;
         }
 
-        public IEnumerable<Cell> GetCells()
+        public IEnumerable<CellDto> GetCells()
         {
             for (var x = 0; x < SizeX; x++)
             for (var y = 0; y < SizeY; y++)
             {
-                yield return this[x, y];
+                yield return this[x, y].ToCellDto();
             }
         }
 

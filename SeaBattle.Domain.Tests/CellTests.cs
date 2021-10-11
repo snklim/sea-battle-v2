@@ -21,12 +21,11 @@ namespace SeaBattle.Domain.Tests
             var fieldId = Guid.NewGuid();
 
             // Act
-            var cell = new ShipCell(posX, posY, fieldId, new ShipDetails());
+            var cell = new ShipCell(posX, posY, new ShipDetails());
 
             // Assert
             Assert.AreEqual(posX, cell.X);
             Assert.AreEqual(posY, cell.Y);
-            Assert.AreEqual(fieldId, cell.FieldId);
             Assert.AreEqual(CellType.Ship, cell.CellType);
         }
     }

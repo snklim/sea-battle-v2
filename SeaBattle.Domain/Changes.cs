@@ -8,6 +8,6 @@ namespace SeaBattle.Domain
     {
         public Guid FieldId { get; init; }
         public Guid PlayerId { get; init; }
-        public IReadOnlyCollection<Cell> AffectedCells { get; init; }
+        public IReadOnlyCollection<CellDto> AffectedCells { get; init; }
     }
 }
