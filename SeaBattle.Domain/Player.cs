@@ -87,7 +87,11 @@ namespace SeaBattle.Domain
             {
                 PlayerId = PlayerId,
                 FieldId = OwnField.FieldId,
-                AffectedCells = affectedCell.Attack().Select(cell=>cell.ToCellDto()).ToArray()
+                AffectedCells = affectedCell.Attack().Select(cell=>
+                {
+                    OwnField[cell.X, cell.Y].Attacked = true;
+                    return cell.ToCellDto();
+                }).ToArray()
             };
             affectedCellDto = affectedCell.ToCellDto();
             return affectedCell.CellType == CellType.Ship;

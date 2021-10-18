@@ -1,0 +1,27 @@
+@model IEnumerable<SeaBattle.Domain.Game>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>title</title>
+</head>
+<body>
+<div>
+    @foreach (var game in Model)
+    {
+        <div>
+            <a href="/game.html?gameid=@game.GameId&playerid=@game.Attacker.PlayerId">Attacker</a>
+            <a href="/game.html?gameid=@game.GameId&playerid=@game.Defender.PlayerId">Defender</a>
+        </div>
+    }
+    <div>
+        <a asp-action="Create">Create</a>
+    </div>
+</div>
+</body>
+</html>

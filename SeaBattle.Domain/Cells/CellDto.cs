@@ -15,7 +15,7 @@ namespace SeaBattle.Domain.Cells
             if (CellType == CellType.Border)
                 return new BorderCell(X, Y);
             if (CellType == CellType.Ship)
-                return new ShipCell(X, X, new ShipDetails());
+                return new ShipCell(X, Y, new ShipDetails());
             return new EmptyCell(X, Y);
         }
     }
