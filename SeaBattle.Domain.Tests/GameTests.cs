@@ -19,6 +19,7 @@ namespace SeaBattle.Domain.Tests
             // Arrange
             var game = new GameBuilder()
                 .WithFieldSize(5, 5)
+                .WithShipAtPositionOnAttackerField(2, 2, 1, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(2, 2, 1, Orientation.Horizontal)
                 .Build();
             var attackerPlayerId = game.Attacker.PlayerId;
@@ -100,6 +101,7 @@ namespace SeaBattle.Domain.Tests
             // Arrange
             var game = new GameBuilder()
                 .WithFieldSize(3, 4)
+                .WithShipAtPositionOnAttackerField(1, 1, 2, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(1, 1, 2, Orientation.Horizontal)
                 .Build();
             
@@ -117,6 +119,7 @@ namespace SeaBattle.Domain.Tests
             // Arrange
             var game = new GameBuilder()
                 .WithFieldSize(3, 4)
+                .WithShipAtPositionOnAttackerField(1, 1, 2, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(1, 1, 2, Orientation.Horizontal)
                 .Build();
             

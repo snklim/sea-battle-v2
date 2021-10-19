@@ -15,7 +15,7 @@
         }
         
         .cell {
-            margin: 2px;
+            margin: 1px;
             width: 30px;
             height: 30px;
             float: left;
@@ -34,11 +34,11 @@
         }
         
         .cell-attacked {
-            background-color: magenta;
+            background-color: gray;
         }
 
         .ship-attacked {
-            background-color: darkred;
+            background-color: red;
         }
 </style>
 </head>
@@ -49,13 +49,14 @@
     <script>
         var scheme = document.location.protocol === "https:" ? "wss" : "ws";
         var port = document.location.port ? (":" + document.location.port) : "";
-        var socket = new WebSocket(scheme + "://" + document.location.hostname + port + "/ws" + document.location.search);
+        var socket = new WebSocket(scheme + "://" + document.location.hostname + port + "/ws");
         var params = new URLSearchParams(document.location.search);
         var gameId = params.get('gameid');
         var playerId = params.get('playerid');
+        var mode = params.get('mode');
         
         socket.onopen = function() {
-            socket.send(`start:${gameId}:${playerId}`);
+            socket.send(`start:${gameId}:${playerId}:${mode}`);
         }
         
         socket.onmessage = function(event) {
@@ -131,11 +132,16 @@
 
                 if (changesList.length > 0) {
                     var fieldIndex = fields[changesList[0].FieldId];
-                    changesList[0].AffectedCells.forEach(cell => {
-                        if (cell.CellType === 2)
-                            model[fieldIndex][cell.X][cell.Y].$cell.addClass('ship-attacked');
-                        else
-                            model[fieldIndex][cell.X][cell.Y].$cell.addClass('cell-attacked');
+                    changesList.forEach(changes => {
+                        changes.AffectedCells.forEach(cell => {
+                            if (cell.CellType === 2)
+                                if (cell.Attacked)
+                                    model[fieldIndex][cell.X][cell.Y].$cell.addClass('ship-attacked');
+                                else
+                                    model[fieldIndex][cell.X][cell.Y].$cell.addClass('cell-ship');
+                            else
+                                model[fieldIndex][cell.X][cell.Y].$cell.addClass('cell-attacked');
+                        });
                     });
                 }
 

@@ -20,7 +20,7 @@ namespace SeaBattle.Web.HostedServices
         private static readonly
             BlockingCollection<(string message, BlockingCollection<GameDetails> gameDetailsProvider)> Tasks = new();
 
-        private static readonly Dictionary<Guid, BlockingCollection<GameDetails>> Updates = new();
+        private static readonly Dictionary<Guid, (BlockingCollection<GameDetails> gameDetailsProvider, bool withBot)> Updates = new();
 
         public BackgroundSocketProcessor(IGameService gameService)
         {
@@ -43,7 +43,9 @@ namespace SeaBattle.Web.HostedServices
 
                 if (action == "start")
                 {
-                    Updates[playerId] = gameDetailsProvider;
+                    var withBot = parts[3] == "withbot";
+                    
+                    Updates[playerId] = (gameDetailsProvider, withBot);
 
                     ProcessStart(game, playerId);
                 }
@@ -52,10 +54,11 @@ namespace SeaBattle.Web.HostedServices
                 {
                     var posX = int.Parse(parts[3]);
                     var posY = int.Parse(parts[4]);
+                    var withBot = Updates[playerId].withBot;
 
                     ProcessAttack(game, new AttackByPositionCommand(posX, posY, playerId));
 
-                    if (game.AttackerChanged)
+                    if (game.AttackerChanged && withBot)
                         AttackByBot(game);
                 }
 
@@ -77,7 +80,7 @@ namespace SeaBattle.Web.HostedServices
             {
                 await Task.Delay(500);
 
-                Tasks.Add(($"bot_attack:{game.GameId}:{game.Attacker.PlayerId}", Updates[game.Defender.PlayerId]));
+                Tasks.Add(($"bot_attack:{game.GameId}:{game.Attacker.PlayerId}", Updates[game.Defender.PlayerId].gameDetailsProvider));
             });
         }
 
@@ -117,7 +120,7 @@ namespace SeaBattle.Web.HostedServices
                     : playerId == game.Attacker.PlayerId ? "YOUR TURN" : "OPPONENT TURN"
             };
 
-            Updates[playerId].Add(gameDetails);
+            Updates[playerId].gameDetailsProvider.Add(gameDetails);
         }
 
         private void ProcessAttack(Game game, AttackPositionCommand command)
@@ -128,7 +131,7 @@ namespace SeaBattle.Web.HostedServices
             {
                 if (Updates.TryGetValue(changes.PlayerId, out var provider))
                 {
-                    provider.Add(new GameDetails
+                    provider.gameDetailsProvider.Add(new GameDetails
                     {
                         ChangesList = new[] {changes},
                         Message = game.GameIsOver 

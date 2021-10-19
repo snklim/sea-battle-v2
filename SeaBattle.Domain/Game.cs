@@ -22,6 +22,25 @@ namespace SeaBattle.Domain
             }
 
             AttackerChanged = !command.Execute(Attacker, Defender, out var changesList);
+
+            if (GameIsOver)
+            {
+                var changes = new Changes
+                {
+                    PlayerId = Defender.PlayerId,
+                    FieldId = Defender.EnemyField.FieldId,
+                    AffectedCells = Defender.AvailablePositions
+                        .Select(pos => Attacker.OwnField[pos.x, pos.y].ToCellDto())
+                        .Where(cell => cell.CellType == CellType.Ship)
+                        .ToArray()
+                };
+
+                var changesListList = changesList.ToList();
+                changesListList.Add(changes);
+
+                changesList = changesListList;
+            }
+
             if (AttackerChanged)
             {
                 (Attacker, Defender) = (Defender, Attacker);

@@ -74,14 +74,14 @@ namespace SeaBattle.Domain.Tests
                 .WithShipAtPositionOnAttackerField(positionX, positionY, shipLength, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(positionX, positionY, shipLength, Orientation.Horizontal)
                 .Build();
-            var attacker = game.Attacker.OwnField;
-            var defender = game.Defender.OwnField;
-            game.Next(new AttackByPositionCommand(0, 0, game.Attacker.OwnField.FieldId));
+            var attacker = game.Attacker.PlayerId;
+            var defender = game.Defender.PlayerId;
+            game.Next(new AttackByPositionCommand(0, 0, game.Attacker.PlayerId));
 
             // Assert
             Assert.IsNotNull(game);
-            Assert.AreSame(attacker, game.Defender.OwnField);
-            Assert.AreSame(defender, game.Attacker.OwnField);
+            Assert.AreEqual(attacker, game.Defender.PlayerId);
+            Assert.AreEqual(defender, game.Attacker.PlayerId);
         }
     }
 }
