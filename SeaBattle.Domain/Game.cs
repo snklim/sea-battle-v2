@@ -14,7 +14,7 @@ namespace SeaBattle.Domain
         public Player Defender { get; set; }
         public bool AttackerChanged { get; private set; }
 
-        public IReadOnlyCollection<Changes> Next(AttackPositionCommand command)
+        public IReadOnlyCollection<Changes> Next(AttackCommand command)
         {
             if (command.AttackerId != Attacker.PlayerId || GameIsOver)
             {

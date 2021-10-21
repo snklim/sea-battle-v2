@@ -5,7 +5,7 @@ using SeaBattle.Domain.Cells;
 
 namespace SeaBattle.Domain.Commands
 {
-    public class AttackByRandomPositionCommand : AttackPositionCommand
+    public class AttackByRandomPositionCommand : AttackCommand
     {
         private static readonly Random Rnd = new Random();
 

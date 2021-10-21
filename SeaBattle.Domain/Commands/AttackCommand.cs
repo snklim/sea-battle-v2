@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace SeaBattle.Domain.Commands
 {
-    public abstract class AttackPositionCommand
+    public abstract class AttackCommand
     {
         public Guid AttackerId { get; }
 
-        protected AttackPositionCommand(Guid attackerId)
+        protected AttackCommand(Guid attackerId)
         {
             AttackerId = attackerId;
         }

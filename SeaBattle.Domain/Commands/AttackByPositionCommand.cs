@@ -5,7 +5,7 @@ using SeaBattle.Domain.Cells;
 
 namespace SeaBattle.Domain.Commands
 {
-    public class AttackByPositionCommand : AttackPositionCommand
+    public class AttackByPositionCommand : AttackCommand
     {
         private readonly int _positionX;
         private readonly int _positionY;

@@ -123,7 +123,7 @@ namespace SeaBattle.Web.HostedServices
             Updates[playerId].gameDetailsProvider.Add(gameDetails);
         }
 
-        private void ProcessAttack(Game game, AttackPositionCommand command)
+        private void ProcessAttack(Game game, AttackCommand command)
         {
             var changesList = game.Next(command);
 
