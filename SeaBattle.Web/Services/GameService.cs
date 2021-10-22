@@ -1,24 +1,19 @@
 using System.Collections.Generic;
 using SeaBattle.Domain;
-using SeaBattle.Domain.Builders;
 
 namespace SeaBattle.Web.Services
 {
-    public interface IGameService
+    public class GameService
     {
-        void Add(Game game);
-        IEnumerable<Game> GetAll();
-    }
-    public class GameService : IGameService
-    {
-        private List<Game> _games = new();
+        private readonly List<(Game game, bool withBot)> _games = new();
+
         
-        public void Add(Game game)
+        public void Add(Game game, bool withBot)
         {
-            _games.Add(game);
+            _games.Add((game, withBot));
         }
 
-        public IEnumerable<Game> GetAll()
+        public IEnumerable<(Game game, bool wtihBot)> GetAll()
         {
             return _games.ToArray();
         }

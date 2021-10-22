@@ -9,9 +9,9 @@ namespace SeaBattle.Web.Controllers
 {
     public class GameController : Controller
     {
-        private readonly IGameService _gameService;
+        private readonly GameService _gameService;
         
-        public GameController(IGameService gameService)
+        public GameController(GameService gameService)
         {
             _gameService = gameService;
         }
@@ -23,14 +23,14 @@ namespace SeaBattle.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(bool withBot = false)
         {
             var game = new GameBuilder()
                 .WithFieldSize(10, 10)
                 .WithShips(new[] {4, 3, 3, 2, 2, 2, 1, 1, 1, 1})
                 .Build();
             
-            _gameService.Add(game);
+            _gameService.Add(game, withBot);
             
             return RedirectToAction("Index");
         }

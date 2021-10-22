@@ -1,4 +1,4 @@
-@model IEnumerable<SeaBattle.Domain.Game>
+@model IEnumerable<(SeaBattle.Domain.Game game, bool withBot)>
 
 @{
     Layout = null;
@@ -12,16 +12,16 @@
 </head>
 <body>
 <div>
-    @foreach (var game in Model)
+    @foreach (var gameDetails in Model)
     {
         <div>
-            <a href="/game.html?gameid=@game.GameId&playerid=@game.Attacker.PlayerId">Play as Attacker</a> |
-            <a href="/game.html?gameid=@game.GameId&playerid=@game.Defender.PlayerId">Play as Defender</a> |
-            <a href="/game.html?gameid=@game.GameId&playerid=@game.Attacker.PlayerId&mode=withbot">Play with Bot</a>
+            <a href="/game.html?gameid=@gameDetails.game.GameId&playerid=@gameDetails.game.Attacker.PlayerId">Play as Attacker</a> |
+            <a href="/game.html?gameid=@gameDetails.game.GameId&playerid=@gameDetails.game.Defender.PlayerId">Play as Defender</a>
         </div>
     }
     <div>
-        <a asp-action="Create">Create</a>
+        <a asp-action="Create">Create</a> |
+        <a asp-action="Create" asp-route-withbot="true">Create with Bot</a>
     </div>
 </div>
 </body>

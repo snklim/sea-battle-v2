@@ -13,4 +13,21 @@
       <ProjectReference Include="..\SeaBattle.Domain\SeaBattle.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="HostedServices\BackgroundSocketProcessor.cs" />
+      <Compile Remove="HostedServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="HostedServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="HostedServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="HostedServices\**" />
+    </ItemGroup>
+
 </Project>
