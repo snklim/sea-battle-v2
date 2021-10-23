@@ -53,10 +53,9 @@
         var params = new URLSearchParams(document.location.search);
         var gameId = params.get('gameid');
         var playerId = params.get('playerid');
-        var mode = params.get('mode');
         
         socket.onopen = function() {
-            socket.send(`start:${gameId}:${playerId}:${mode}`);
+            socket.send(`start:${gameId}:${playerId}`);
         }
         
         socket.onmessage = function(event) {
@@ -65,25 +64,25 @@
             var changesList = gameDetails.ChangesList;
 
             console.log(gameDetails)
-            
+
             var model = {};
-            
+
             var fields = {};
-            
+
             changesList.forEach((changes, index) => {
-                model[index] = model[index] || { };
-                changes.AffectedCells.forEach(cell=>{
+                model[index] = model[index] || {};
+                changes.AffectedCells.forEach(cell => {
                     model[index][cell.X] = model[index][cell.X] || {};
                     model[index][cell.X][cell.Y] = {
                         CellType: cell.CellType,
                         Attacked: cell.Attacked,
-                        FieldId: changes.FieldId, 
+                        FieldId: changes.FieldId,
                         PlayerId: changes.PlayerId
                     };
                     fields[changes.FieldId] = index;
                 })
             });
-            
+
             Object.getOwnPropertyNames(model).forEach(fieldIndex => {
                 var $field = $('<div class="field"></div>');
                 $('#game').append($field)
@@ -91,9 +90,9 @@
                     var $row = $('<div class="row"></div>');
                     $field.append($row);
                     Object.getOwnPropertyNames(model[fieldIndex][rowIndex]).forEach(cellIndex => {
-                        
+
                         var $cell = $(`<div class="cell" data-x="${rowIndex}" data-y="${cellIndex}"></div>`);
-                        
+
                         if (model[fieldIndex][rowIndex][cellIndex].CellType === 0) {
                             $cell.addClass('cell-empty');
                         }
@@ -110,7 +109,7 @@
                                 $cell.addClass('cell-attacked');
                         }
                         $row.append($cell);
-                        
+
                         model[fieldIndex][rowIndex][cellIndex].$cell = $cell;
 
                         $cell.on('click', e => {
@@ -118,7 +117,7 @@
 
                             socket.send(`attack:${gameId}:${playerId}:${$el.attr('data-x')}:${$el.attr('data-y')}`);
                         })
-                        
+
                     })
                 })
             });
@@ -131,8 +130,8 @@
                 console.log(gameDetails)
 
                 if (changesList.length > 0) {
-                    var fieldIndex = fields[changesList[0].FieldId];
                     changesList.forEach(changes => {
+                        var fieldIndex = fields[changes.FieldId];
                         changes.AffectedCells.forEach(cell => {
                             if (cell.CellType === 2)
                                 if (cell.Attacked)
@@ -147,7 +146,7 @@
 
                 $('#message').text(gameDetails.Message);
             }
-            
+
             $('#message').text(gameDetails.Message);
         }
         
