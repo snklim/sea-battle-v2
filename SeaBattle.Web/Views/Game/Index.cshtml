@@ -1,28 +1,23 @@
-@model IEnumerable<(SeaBattle.Domain.Game game, bool withBot)>
+@model IEnumerable<SeaBattle.Web.Models.GameDetails>
 
 @{
-    Layout = null;
+    Layout = "_Layout";
 }
 
-<!DOCTYPE html>
+@foreach (var gameDetails in Model)
+{
+    <div style="padding: 10px;">
+        @if (gameDetails.FirstPlayer.UserName == User.Identity.Name)
+        {
+            <a href="/game.html?gameid=@gameDetails.Game.GameId&playerid=@gameDetails.FirstPlayer.PlayerId">Play with @gameDetails.SecondPlayer.UserName</a>
+        }
 
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-    @foreach (var gameDetails in Model)
-    {
-        <div>
-            <a href="/game.html?gameid=@gameDetails.game.GameId&playerid=@gameDetails.game.Attacker.PlayerId">Play as Attacker</a> |
-            <a href="/game.html?gameid=@gameDetails.game.GameId&playerid=@gameDetails.game.Defender.PlayerId">Play as Defender</a>
-        </div>
-    }
-    <div>
-        <a asp-action="Create">Create</a> |
-        <a asp-action="Create" asp-route-withbot="true">Create with Bot</a>
+        @if (gameDetails.SecondPlayer.UserName == User.Identity.Name)
+        {
+            <a href="/game.html?gameid=@gameDetails.Game.GameId&playerid=@gameDetails.SecondPlayer.PlayerId">Play with @gameDetails.FirstPlayer.UserName</a>
+        }
     </div>
+}
+<div style="padding: 10px;">
+    <a asp-controller="Game" asp-action="Create">Create</a>
 </div>
-</body>
-</html>

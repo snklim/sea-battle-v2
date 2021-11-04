@@ -1,7 +1,10 @@
 @{
     ViewData["Title"] = "Home Page";
 }
- 
+
+@{
+    Layout = "_Layout";
+}
  
 @if(User.Identity.IsAuthenticated)
 {

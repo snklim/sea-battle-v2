@@ -39,29 +39,34 @@ namespace SeaBattle.Web.Handlers
 
         private async Task ProcessMessageAsync(Guid gameId, Guid playerId, string action, int posX = -1, int posY = -1)
         {
-            var gameDetails = _gameService.GetAll().FirstOrDefault(x => x.game.GameId == gameId);
+            var gameDetails = _gameService.GetAll().FirstOrDefault(x => x.Game.GameId == gameId);
+
+            if (gameDetails == null)
+            {
+                return;
+            }
 
             if (action == "start")
             {
-                await ProcessStartAsync(gameDetails.game);
+                await ProcessStartAsync(gameDetails.Game);
             }
 
             if (action == "attack")
             {
-                var withBot = gameDetails.wtihBot;
+                var withBot = gameDetails.WithBot;
 
-                await ProcessAttackAsync(gameDetails.game, new AttackByPositionCommand(posX, posY, playerId));
+                await ProcessAttackAsync(gameDetails.Game, new AttackByPositionCommand(posX, posY, playerId));
 
-                if (gameDetails.game.AttackerChanged && withBot)
-                    AttackByBot(gameDetails.game);
+                if (gameDetails.Game.AttackerChanged && withBot)
+                    AttackByBot(gameDetails.Game);
             }
 
             if (action == "bot_attack")
             {
-                await ProcessAttackAsync(gameDetails.game, new AttackByRandomPositionCommand(playerId));
+                await ProcessAttackAsync(gameDetails.Game, new AttackByRandomPositionCommand(playerId));
 
-                if (!gameDetails.game.AttackerChanged)
-                    AttackByBot(gameDetails.game);
+                if (!gameDetails.Game.AttackerChanged)
+                    AttackByBot(gameDetails.Game);
             }
         }
 
@@ -122,7 +127,7 @@ namespace SeaBattle.Web.Handlers
                 if (_connectionManager.TryGet(game.GameId, changesGroup.Key, out var webSocket))
                 {
                     await SendMessageAsync(webSocket,
-                        System.Text.Json.JsonSerializer.Serialize(new GameDetails
+                        System.Text.Json.JsonSerializer.Serialize(new GameState
                         {
                             ChangesList = changesGroup.ToArray(),
                             Message = game.GameIsOver

@@ -1,0 +1,15 @@
+@model SeaBattle.Web.ViewModels.CreateGameViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+<form asp-controller="Game" asp-action="Create" method="post">
+    <div>
+        <label asp-for="User"></label><br/>
+        <select asp-items="Model.Users" asp-for="User"></select>
+    </div>
+    <div>
+        <input type="submit" value="Create"/>
+    </div>
+</form>

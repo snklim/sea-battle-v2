@@ -24,10 +24,18 @@
 
     <ItemGroup>
       <None Remove="HostedServices\**" />
+      <None Remove="CliendApp\src\polyfills.ts" />
+      <None Remove="CliendApp\src\main.ts" />
+      <None Remove="CliendApp\src\index.html" />
+      <None Remove="CliendApp\src\app\app.module.ts" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Remove="HostedServices\**" />
+      <Content Remove="CliendApp\tsconfig.json" />
+      <Content Remove="CliendApp\package.json" />
+      <Content Remove="CliendApp\package-lock.json" />
+      <Content Remove="CliendApp\angular.json" />
     </ItemGroup>
 
 </Project>

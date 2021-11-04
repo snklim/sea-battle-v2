@@ -1,19 +1,19 @@
 using System.Collections.Generic;
-using SeaBattle.Domain;
+using SeaBattle.Web.Models;
 
 namespace SeaBattle.Web.Services
 {
     public class GameService
     {
-        private readonly List<(Game game, bool withBot)> _games = new();
+        private readonly List<GameDetails> _games = new();
 
         
-        public void Add(Game game, bool withBot)
+        public void Add(GameDetails gameDetails)
         {
-            _games.Add((game, withBot));
+            _games.Add(gameDetails);
         }
 
-        public IEnumerable<(Game game, bool wtihBot)> GetAll()
+        public IEnumerable<GameDetails> GetAll()
         {
             return _games.ToArray();
         }
