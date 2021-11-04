@@ -7,7 +7,7 @@ namespace SeaBattle.Domain.Commands
 {
     public class AttackByRandomPositionCommand : AttackCommand
     {
-        private static readonly Random Rnd = new Random();
+        private static readonly Random Rnd = new ();
 
         public AttackByRandomPositionCommand(Guid attackerId) : base(attackerId)
         {
@@ -19,14 +19,14 @@ namespace SeaBattle.Domain.Commands
             if (attacker.NextPositions.Any())
             {
                 var position = attacker.NextPositions[Rnd.Next(attacker.NextPositions.Count)];
-                return attacker.Attack(defender, position.x, position.y, out changesList);
+                return attacker.Attack(defender, position.X, position.Y, out changesList);
             }
 
             var availablePositions = attacker.AvailablePositions;
             if (availablePositions.Any())
             {
                 var position = availablePositions[Rnd.Next(availablePositions.Count)];
-                return attacker.Attack(defender, position.x, position.y, out changesList);
+                return attacker.Attack(defender, position.X, position.Y, out changesList);
             }
 
             changesList = Array.Empty<Changes>();

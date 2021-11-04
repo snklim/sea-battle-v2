@@ -1,11 +1,15 @@
 using System.Linq;
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SeaBattle.Domain.Builders;
+using SeaBattle.Web.Events;
+using SeaBattle.Web.Handlers;
+using SeaBattle.Web.Managers;
 using SeaBattle.Web.Models;
-using SeaBattle.Web.Services;
 using SeaBattle.Web.ViewModels;
 
 namespace SeaBattle.Web.Controllers
@@ -13,19 +17,21 @@ namespace SeaBattle.Web.Controllers
     [Authorize]
     public class GameController : Controller
     {
-        private readonly GameService _gameService;
+        private readonly GameManager _gameManager;
         private readonly UserManager<User> _userManager;
+        private readonly IMediator _mediator;
 
-        public GameController(GameService gameService, UserManager<User> userManager)
+        public GameController(GameManager gameManager, UserManager<User> userManager, IMediator mediator)
         {
-            _gameService = gameService;
+            _gameManager = gameManager;
             _userManager = userManager;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
-            return View(_gameService.GetAll()
+            return View(_gameManager.GetAll()
                 .Where(gameDetails => !gameDetails.Game.GameIsOver)
                 .ToArray());
         }
@@ -44,14 +50,14 @@ namespace SeaBattle.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CreateGameViewModel model)
+        public async Task<IActionResult> Create(CreateGameViewModel model)
         {
             var game = new GameBuilder()
                 .WithFieldSize(10, 10)
                 .WithShips(new[] {4, 3, 3, 2, 2, 2, 1, 1, 1, 1})
                 .Build();
 
-            _gameService.Add(new GameDetails
+            _gameManager.Add(new GameDetails
             {
                 Game = game,
                 FirstPlayer = new PlayerDetails
@@ -64,6 +70,13 @@ namespace SeaBattle.Web.Controllers
                     PlayerId = game.Defender.PlayerId,
                     UserName = model.User
                 }
+            });
+            
+            await _mediator.Publish(new InfoEvent
+            {
+                FromUser = User.Identity.Name,
+                ToUser = model.User,
+                Message = $"Game was created by {User.Identity.Name}."
             });
 
             return RedirectToAction("Index");

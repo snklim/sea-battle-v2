@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 
-namespace SeaBattle.Web.Handlers
+namespace SeaBattle.Web.Managers
 {
-    public class ConnectionManager
+    public class GameConnectionManager
     {
         private readonly Dictionary<Guid, Dictionary<Guid, WebSocket>> _socketsPerGame = new();
 

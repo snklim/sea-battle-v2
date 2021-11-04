@@ -1,8 +1,6 @@
 using System.IO;
-using System.Net;
-using System.Text.Json;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -10,11 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SeaBattle.Domain.Builders;
 using SeaBattle.Web.Handlers;
+using SeaBattle.Web.Managers;
 using SeaBattle.Web.Middlewares;
 using SeaBattle.Web.Models;
-using SeaBattle.Web.Services;
 
 namespace SeaBattle.Web
 {
@@ -31,9 +28,12 @@ namespace SeaBattle.Web
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<GameService>();
+            services.AddSingleton<GameStateHandler>();
             services.AddSingleton<GameWebSocketHandler>();
-            services.AddSingleton<ConnectionManager>();
+            services.AddSingleton<InfoWebSocketHandler>();
+            services.AddSingleton<GameConnectionManager>();
+            services.AddSingleton<InfoConnectionManager>();
+            services.AddSingleton<GameManager>();
 
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -42,6 +42,8 @@ namespace SeaBattle.Web
                 .AddEntityFrameworkStores<ApplicationContext>();
 
             services.AddMvc();
+
+            services.AddMediatR(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +51,6 @@ namespace SeaBattle.Web
         {
             var serviceScopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
             var serviceProvider = serviceScopeFactory.CreateScope().ServiceProvider;
-
 
             if (env.IsDevelopment())
             {
@@ -68,6 +69,9 @@ namespace SeaBattle.Web
 
             app.Map("/ws", x =>
                 x.UseMiddleware<WebSocketMiddleware>(serviceProvider.GetService<GameWebSocketHandler>()));
+            
+            app.Map("/info", x =>
+                x.UseMiddleware<WebSocketMiddleware>(serviceProvider.GetService<InfoWebSocketHandler>()));
 
             app.UseEndpoints(endpoints =>
             {

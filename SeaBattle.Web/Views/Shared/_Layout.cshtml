@@ -3,12 +3,24 @@
 <html>
 <head>
     <title>Sea Battle - Wellcome</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 </head>
 <body>
 <div>
     <a asp-controller="Game" asp-action="Index">Game</a>
     
     @RenderBody()
+    
+    <div id="messages"></div>
 </div>
+<script>
+    var scheme = document.location.protocol === "https:" ? "wss" : "ws";
+    var port = document.location.port ? (":" + document.location.port) : "";
+    var socket = new WebSocket(scheme + "://" + document.location.hostname + port + "/info");
+    
+    socket.onmessage = function(event) {
+        $('#messages').append(`<div>${event.data}</div>`);
+    }
+</script>
 </body>
 </html>

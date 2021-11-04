@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using SeaBattle.Web.Models;
 
-namespace SeaBattle.Web.Services
+namespace SeaBattle.Web.Managers
 {
-    public class GameService
+    public class GameManager
     {
-        private readonly List<GameDetails> _games = new();
-
+        private static readonly List<GameDetails> _games = new();
         
         public void Add(GameDetails gameDetails)
         {

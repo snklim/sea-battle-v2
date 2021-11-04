@@ -19,7 +19,7 @@ namespace SeaBattle.Domain.Commands
         protected override bool ExecuteInternal(Player attacker, Player defender,
             out IReadOnlyCollection<Changes> changesList)
         {
-            if (!attacker.AvailablePositions.Any(cell => cell.x == _positionX && cell.y == _positionY))
+            if (!attacker.AvailablePositions.Any(cell => cell.X == _positionX && cell.Y == _positionY))
             {
                 changesList = Array.Empty<Changes>();
                 return true;

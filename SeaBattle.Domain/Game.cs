@@ -30,7 +30,7 @@ namespace SeaBattle.Domain
                     PlayerId = Defender.PlayerId,
                     FieldId = Defender.EnemyField.FieldId,
                     AffectedCells = Defender.AvailablePositions
-                        .Select(pos => Attacker.OwnField[pos.x, pos.y].ToCellDto())
+                        .Select(pos => Attacker.OwnField[pos.X, pos.Y].ToCellDto())
                         .Where(cell => cell.CellType == CellType.Ship)
                         .ToArray()
                 };

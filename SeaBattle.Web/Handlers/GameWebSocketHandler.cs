@@ -1,25 +1,24 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using SeaBattle.Domain;
-using SeaBattle.Domain.Commands;
+using MediatR;
+using SeaBattle.Web.Events;
+using SeaBattle.Web.Managers;
 using SeaBattle.Web.Models;
-using SeaBattle.Web.Services;
 
 namespace SeaBattle.Web.Handlers
 {
-    public class GameWebSocketHandler : WebSocketHandler
+    public class GameWebSocketHandler : WebSocketHandler, INotificationHandler<GameEvent>
     {
-        private readonly ConnectionManager _connectionManager;
-        private readonly GameService _gameService;
+        private readonly GameConnectionManager _gameConnectionManager;
+        private readonly IMediator _mediator;
 
-        public GameWebSocketHandler(ConnectionManager connectionManager, GameService gameService)
+        public GameWebSocketHandler(GameConnectionManager gameConnectionManager, IMediator mediator)
         {
-            _connectionManager = connectionManager;
-            _gameService = gameService;
+            _gameConnectionManager = gameConnectionManager;
+            _mediator = mediator;
         }
 
         public override async Task ReceiveAsync(WebSocket webSocket, WebSocketReceiveResult result, byte[] buffer)
@@ -32,111 +31,28 @@ namespace SeaBattle.Web.Handlers
             var posX = parts.Length > 4 && int.TryParse(parts[3], out var x) ? x : -1;
             var posY = parts.Length > 4 && int.TryParse(parts[4], out var y) ? y : -1;
 
-            _connectionManager.Set(gameId, playerId, webSocket);
+            _gameConnectionManager.Set(gameId, playerId, webSocket);
 
-            await ProcessMessageAsync(gameId, playerId, action, posX, posY);
-        }
-
-        private async Task ProcessMessageAsync(Guid gameId, Guid playerId, string action, int posX = -1, int posY = -1)
-        {
-            var gameDetails = _gameService.GetAll().FirstOrDefault(x => x.Game.GameId == gameId);
-
-            if (gameDetails == null)
+            await _mediator.Publish(new MoveEvent
             {
-                return;
-            }
-
-            if (action == "start")
-            {
-                await ProcessStartAsync(gameDetails.Game);
-            }
-
-            if (action == "attack")
-            {
-                var withBot = gameDetails.WithBot;
-
-                await ProcessAttackAsync(gameDetails.Game, new AttackByPositionCommand(posX, posY, playerId));
-
-                if (gameDetails.Game.AttackerChanged && withBot)
-                    AttackByBot(gameDetails.Game);
-            }
-
-            if (action == "bot_attack")
-            {
-                await ProcessAttackAsync(gameDetails.Game, new AttackByRandomPositionCommand(playerId));
-
-                if (!gameDetails.Game.AttackerChanged)
-                    AttackByBot(gameDetails.Game);
-            }
-        }
-
-        private void AttackByBot(Game game)
-        {
-            Task.Run(async () =>
-            {
-                await Task.Delay(500);
-
-                await ProcessMessageAsync(game.GameId, game.Attacker.PlayerId, "bot_attack");
+                Action = action,
+                GameId = gameId,
+                PlayerId = playerId,
+                PosX = posX,
+                PosY = posY
             });
         }
 
-        private async Task ProcessStartAsync(Game game)
+        public async Task Handle(GameEvent notification, CancellationToken cancellationToken)
         {
-            var changesList = new[]
+            if (_gameConnectionManager.TryGet(notification.GameId, notification.PlayerId, out var webSocket))
             {
-                new Changes
-                {
-                    PlayerId = game.Attacker.PlayerId,
-                    FieldId = game.Attacker.OwnField.FieldId,
-                    AffectedCells = game.Attacker.OwnField.GetCells().ToArray()
-                },
-                new Changes
-                {
-                    PlayerId = game.Attacker.PlayerId,
-                    FieldId = game.Attacker.EnemyField.FieldId,
-                    AffectedCells = game.Attacker.EnemyField.GetCells().ToArray()
-                },
-                new Changes
-                {
-                    PlayerId = game.Defender.PlayerId,
-                    FieldId = game.Defender.OwnField.FieldId,
-                    AffectedCells = game.Defender.OwnField.GetCells().ToArray()
-                },
-                new Changes
-                {
-                    PlayerId = game.Defender.PlayerId,
-                    FieldId = game.Defender.EnemyField.FieldId,
-                    AffectedCells = game.Defender.EnemyField.GetCells().ToArray()
-                }
-            };
-
-            await UpdateConsumersAsync(game, changesList);
-        }
-
-        private async Task ProcessAttackAsync(Game game, AttackCommand command)
-        {
-            var changesList = game.Next(command);
-
-            await UpdateConsumersAsync(game, changesList);
-        }
-
-        private async Task UpdateConsumersAsync(Game game, IReadOnlyCollection<Changes> changesList)
-        {
-            foreach (var changesGroup in changesList.GroupBy(x => x.PlayerId))
-            {
-                if (_connectionManager.TryGet(game.GameId, changesGroup.Key, out var webSocket))
-                {
-                    await SendMessageAsync(webSocket,
-                        System.Text.Json.JsonSerializer.Serialize(new GameState
-                        {
-                            ChangesList = changesGroup.ToArray(),
-                            Message = game.GameIsOver
-                                ? changesGroup.Key == game.Attacker.PlayerId ? "YOU WIN" : "YOU LOSE"
-                                : changesGroup.Key == game.Attacker.PlayerId
-                                    ? "YOUR TURN"
-                                    : "OPPONENT TURN"
-                        }));
-                }
+                await SendMessageAsync(webSocket,
+                    System.Text.Json.JsonSerializer.Serialize(new GameState
+                    {
+                        ChangesList = notification.ChangesList,
+                        Message = notification.Message
+                    }));
             }
         }
     }

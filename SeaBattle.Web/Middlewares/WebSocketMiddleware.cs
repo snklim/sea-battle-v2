@@ -28,7 +28,7 @@ namespace SeaBattle.Web.Middlewares
 
             var socket = await context.WebSockets.AcceptWebSocketAsync();
 
-            await _webSocketHandler.OnConnected(socket);
+            await _webSocketHandler.OnConnected(context, socket);
 
             var buffer = new byte[1024 * 4];
             while (socket.State == WebSocketState.Open)
@@ -41,7 +41,7 @@ namespace SeaBattle.Web.Middlewares
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    await _webSocketHandler.OnDisconnected(socket);
+                    await _webSocketHandler.OnDisconnected(context, socket);
                 }
             }
         }
