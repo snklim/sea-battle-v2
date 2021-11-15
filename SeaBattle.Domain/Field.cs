@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Enums;
 
 namespace SeaBattle.Domain
@@ -12,6 +11,7 @@ namespace SeaBattle.Domain
         public int SizeX { get; }
         public int SizeY { get; }
         public Guid FieldId { get; } = Guid.NewGuid();
+        public Dictionary<Guid, ShipDetails> Ships { get; } = new();
 
         public Field(int sizeX, int sizeY)
         {
@@ -21,11 +21,11 @@ namespace SeaBattle.Domain
             for (var x = 0; x < sizeX; x++)
             for (var y = 0; y < sizeY; y++)
             {
-                Cells[x, y] = new EmptyCell(x, y);
+                Cells[x, y] = new Cell(x, y);
             }
         }
-        
-        public Cell this[int x,int y]
+
+        public Cell this[int x, int y]
         {
             get
             {
@@ -38,7 +38,7 @@ namespace SeaBattle.Domain
             }
             set
             {
-                if (IsPositionValid(x,y))
+                if (IsPositionValid(x, y))
                 {
                     Cells[x, y] = value;
                     return;
@@ -48,17 +48,55 @@ namespace SeaBattle.Domain
             }
         }
 
+        public IEnumerable<Cell> Attack(int posX, int posY, out Cell attackedCell)
+        { 
+            attackedCell = this[posX, posY];
+
+            if (attackedCell.Attacked) return Enumerable.Empty<Cell>();
+
+            attackedCell.Attacked = true;
+
+            if (attackedCell.CellType == CellType.Ship)
+            {
+                var shipDetails = Ships[attackedCell.ShipId];
+
+                if (shipDetails.Ship.Select(pos => this[pos.X, pos.Y]).Count(cell => !cell.Attacked) == 0)
+                {
+                    attackedCell.IsShipDestroyed = true;
+                    var affectedCells = new List<Cell>();
+
+                    foreach (var cell in shipDetails.Border.Select(pos => this[pos.X, pos.Y]))
+                    {
+                        cell.Attacked = true;
+                        cell.IsShipDestroyed = true;
+                        affectedCells.Add(cell);
+                    }
+
+                    foreach (var cell in shipDetails.Ship.Select(pos => this[pos.X, pos.Y]))
+                    {
+                        cell.Attacked = true;
+                        cell.IsShipDestroyed = true;
+                        affectedCells.Add(cell);
+                    }
+
+                    return affectedCells;
+                }
+            }
+
+            return new[] {attackedCell};
+        }
+
         public bool IsPositionValid(int x, int y)
         {
             return 0 <= x && x < SizeX && 0 <= y && y < SizeY;
         }
 
-        public IEnumerable<CellDto> GetCells()
+        public IEnumerable<Cell> GetCells()
         {
             for (var x = 0; x < SizeX; x++)
             for (var y = 0; y < SizeY; y++)
             {
-                yield return this[x, y].ToCellDto();
+                yield return this[x, y];
             }
         }
 

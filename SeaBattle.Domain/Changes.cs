@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SeaBattle.Domain.Cells;
 
 namespace SeaBattle.Domain
 {
@@ -8,6 +7,6 @@ namespace SeaBattle.Domain
     {
         public Guid FieldId { get; init; }
         public Guid PlayerId { get; init; }
-        public IReadOnlyCollection<CellDto> AffectedCells { get; init; }
+        public IReadOnlyCollection<Cell> AffectedCells { get; init; }
     }
 }

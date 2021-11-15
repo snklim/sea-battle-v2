@@ -157,7 +157,7 @@ namespace SeaBattle.Domain.Tests
                 .Execute(attacker, defender, out _);
 
             // Assert
-            Assert.AreEqual(new[] {(x: 3, y: 0), (x: 4, y: 1)}, attacker.NextPositions);
+            Assert.AreEqual(new[] {new Position(x: 3, y: 0), new Position(x: 4, y: 1)}, attacker.NextPositions);
         }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Commands;
 using SeaBattle.Domain.Enums;
 
@@ -30,7 +29,7 @@ namespace SeaBattle.Domain
                     PlayerId = Defender.PlayerId,
                     FieldId = Defender.EnemyField.FieldId,
                     AffectedCells = Defender.AvailablePositions
-                        .Select(pos => Attacker.OwnField[pos.X, pos.Y].ToCellDto())
+                        .Select(pos => Attacker.OwnField[pos.X, pos.Y])
                         .Where(cell => cell.CellType == CellType.Ship)
                         .ToArray()
                 };

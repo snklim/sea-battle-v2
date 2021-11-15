@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Enums;
 
 namespace SeaBattle.Domain.Builders
@@ -59,21 +58,25 @@ namespace SeaBattle.Domain.Builders
 
         private void PlaceShipOnField(List<(int x, int y)> ship, List<(int x, int y)> border)
         {
+            var shipId = Guid.NewGuid();
             var shipDetails = new ShipDetails();
+            
             border.ForEach(cell =>
             {
-                var borderCell = new BorderCell(cell.x, cell.y);
-                _field[cell.x, cell.y] = borderCell;
-                shipDetails.Border.Add(borderCell);
+                _field[cell.x, cell.y].CellType = CellType.Border;
+                shipDetails.Border.Add(new Position(cell.x, cell.y));
                 _availablePositions.Remove(cell);
             });
+            
             ship.ForEach(cell =>
             {
-                var shipCell = new ShipCell(cell.x, cell.y, shipDetails);
-                _field[cell.x, cell.y] = shipCell;
-                shipDetails.Ship.Add(shipCell);
+                _field[cell.x, cell.y].CellType = CellType.Ship;
+                _field[cell.x, cell.y].ShipId = shipId;
+                shipDetails.Ship.Add(new Position(cell.x,cell.y));
                 _availablePositions.Remove(cell);
             });
+            
+            _field.Ships.Add(shipId, shipDetails);
         }
 
         private bool TryGenerateShip(int x, int y, int length, Orientation orientation,

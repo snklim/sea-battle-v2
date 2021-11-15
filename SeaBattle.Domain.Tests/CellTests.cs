@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using SeaBattle.Domain.Cells;
 using SeaBattle.Domain.Enums;
 
 namespace SeaBattle.Domain.Tests
@@ -21,7 +20,7 @@ namespace SeaBattle.Domain.Tests
             var fieldId = Guid.NewGuid();
 
             // Act
-            var cell = new ShipCell(posX, posY, new ShipDetails());
+            var cell = new Cell(posX, posY);
 
             // Assert
             Assert.AreEqual(posX, cell.X);
