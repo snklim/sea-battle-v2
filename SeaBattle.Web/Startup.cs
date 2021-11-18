@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SeaBattle.Web.Data;
 using SeaBattle.Web.Handlers;
 using SeaBattle.Web.Managers;
 using SeaBattle.Web.Middlewares;
@@ -28,12 +30,12 @@ namespace SeaBattle.Web
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<GameStateHandler>();
-            services.AddSingleton<GameWebSocketHandler>();
-            services.AddSingleton<InfoWebSocketHandler>();
-            services.AddSingleton<GameConnectionManager>();
-            services.AddSingleton<InfoConnectionManager>();
-            services.AddSingleton<GameManager>();
+            services.AddScoped<GameStateHandler>();
+            services.AddScoped<GameWebSocketHandler>();
+            services.AddScoped<InfoWebSocketHandler>();
+            services.AddScoped<GameConnectionManager>();
+            services.AddScoped<InfoConnectionManager>();
+            services.AddScoped<GameManager>();
 
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -68,19 +70,18 @@ namespace SeaBattle.Web
             app.UseWebSockets();
 
             app.Map("/ws", x =>
-                x.UseMiddleware<WebSocketMiddleware>(serviceProvider.GetService<GameWebSocketHandler>()));
-            
+                x.UseMiddleware<WebSocketMiddleware>(serviceProvider.GetService<GameWebSocketHandler>() ??
+                                                     throw new NullReferenceException()));
+
             app.Map("/info", x =>
-                x.UseMiddleware<WebSocketMiddleware>(serviceProvider.GetService<InfoWebSocketHandler>()));
+                x.UseMiddleware<WebSocketMiddleware>(serviceProvider.GetService<InfoWebSocketHandler>() ??
+                                                     throw new NullReferenceException()));
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-                endpoints.MapGet("/game.html",
-                    async context => { await context.Response.WriteAsync(await File.ReadAllTextAsync("game.html")); });
             });
         }
     }

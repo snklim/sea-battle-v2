@@ -8,28 +8,34 @@ namespace SeaBattle.Domain
 {
     public class Game
     {
-        public Guid GameId { get; } = Guid.NewGuid();
-        public Player Attacker { get; set; }
-        public Player Defender { get; set; }
+        public Guid GameId { get; set; } = Guid.NewGuid();
+        public Player FirstPlayer { get; init; }
+        public Player SecondPlayer { get; init; }
         public bool AttackerChanged { get; private set; }
+        public Guid AttackerId { get; set; }
+        public Guid DefenderId { get; set; }
 
         public IReadOnlyCollection<Changes> Next(AttackCommand command)
         {
-            if (command.AttackerId != Attacker.PlayerId || GameIsOver)
+            var (attacker, defender) = FirstPlayer.PlayerId == AttackerId
+                ? (FirstPlayer, SecondPlayer)
+                : (SecondPlayer, FirstPlayer);
+            
+            if (command.AttackerId != attacker.PlayerId || GameIsOver)
             {
                 return Array.Empty<Changes>();
             }
 
-            AttackerChanged = !command.Execute(Attacker, Defender, out var changesList);
+            AttackerChanged = !command.Execute(attacker, defender, out var changesList);
 
             if (GameIsOver)
             {
                 var changes = new Changes
                 {
-                    PlayerId = Defender.PlayerId,
-                    FieldId = Defender.EnemyField.FieldId,
-                    AffectedCells = Defender.AvailablePositions
-                        .Select(pos => Attacker.OwnField[pos.X, pos.Y])
+                    PlayerId = defender.PlayerId,
+                    FieldId = defender.EnemyField.FieldId,
+                    AffectedCells = defender.AvailablePositions
+                        .Select(pos => attacker.OwnField[pos.X, pos.Y])
                         .Where(cell => cell.CellType == CellType.Ship)
                         .ToArray()
                 };
@@ -42,12 +48,12 @@ namespace SeaBattle.Domain
 
             if (AttackerChanged)
             {
-                (Attacker, Defender) = (Defender, Attacker);
+                (AttackerId, DefenderId) = (DefenderId, AttackerId);
             }
 
             return changesList;
         }
 
-        public bool GameIsOver => Attacker.OwnField.AllShipsDestroyed || Defender.OwnField.AllShipsDestroyed;
+        public bool GameIsOver => FirstPlayer.OwnField.AllShipsDestroyed || SecondPlayer.OwnField.AllShipsDestroyed;
     }
 }

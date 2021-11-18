@@ -41,10 +41,13 @@ namespace SeaBattle.Domain.Builders
 
         public Game Build()
         {
+            var (firstPlayer, secondPlayer) = (_attackerBuilder.Build(), _defenderBuilder.Build());
             _game = new Game
             {
-                Attacker = _attackerBuilder.Build(),
-                Defender = _defenderBuilder.Build()
+                FirstPlayer = firstPlayer,
+                SecondPlayer = secondPlayer,
+                AttackerId = firstPlayer.PlayerId,
+                DefenderId = secondPlayer.PlayerId
             };
             return _game;
         }

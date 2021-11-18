@@ -7,10 +7,10 @@ namespace SeaBattle.Domain
 {
     public class Player
     {
-        public Guid PlayerId { get; } = Guid.NewGuid();
+        public Guid PlayerId { get; set; } = Guid.NewGuid();
 
-        public Field OwnField { get; init; }
-        public Field EnemyField { get; init; }
+        public Field OwnField { get; set; }
+        public Field EnemyField { get; set; }
 
         public List<Position> NextPositions { get; } = new();
         public List<Position> PreviousHits { get; } = new();

@@ -5,12 +5,14 @@ namespace SeaBattle.Domain
 {
     public class Cell
     {
-        public Cell(int x, int y)
+        public Cell(Guid fieldId, int x, int y)
         {
+            FieldId = fieldId;
             X = x;
             Y = y;
         }
 
+        public Guid FieldId { get; set; }
         public bool IsShipDestroyed { get; set; }
         public bool Attacked { get; set; }
         public int X { get; }

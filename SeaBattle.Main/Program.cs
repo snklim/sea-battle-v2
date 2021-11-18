@@ -22,27 +22,27 @@ namespace SeaBattle.Main
             {
                 new Changes
                 {
-                    PlayerId = game.Attacker.PlayerId,
-                    FieldId = game.Attacker.OwnField.FieldId,
-                    AffectedCells = game.Attacker.OwnField.GetCells().ToArray()
+                    PlayerId = game.FirstPlayer.PlayerId,
+                    FieldId = game.FirstPlayer.OwnField.FieldId,
+                    AffectedCells = game.FirstPlayer.OwnField.GetCells().ToArray()
                 },
                 new Changes
                 {
-                    PlayerId = game.Attacker.PlayerId,
-                    FieldId = game.Attacker.EnemyField.FieldId,
-                    AffectedCells = game.Attacker.EnemyField.GetCells().ToArray()
+                    PlayerId = game.FirstPlayer.PlayerId,
+                    FieldId = game.FirstPlayer.EnemyField.FieldId,
+                    AffectedCells = game.FirstPlayer.EnemyField.GetCells().ToArray()
                 },
                 new Changes
                 {
-                    PlayerId = game.Defender.PlayerId,
-                    FieldId = game.Defender.OwnField.FieldId,
-                    AffectedCells = game.Defender.OwnField.GetCells().ToArray()
+                    PlayerId = game.SecondPlayer.PlayerId,
+                    FieldId = game.SecondPlayer.OwnField.FieldId,
+                    AffectedCells = game.SecondPlayer.OwnField.GetCells().ToArray()
                 },
                 new Changes
                 {
-                    PlayerId = game.Defender.PlayerId,
-                    FieldId = game.Defender.EnemyField.FieldId,
-                    AffectedCells = game.Defender.EnemyField.GetCells().ToArray()
+                    PlayerId = game.SecondPlayer.PlayerId,
+                    FieldId = game.SecondPlayer.EnemyField.FieldId,
+                    AffectedCells = game.SecondPlayer.EnemyField.GetCells().ToArray()
                 }
             });
 
@@ -50,7 +50,7 @@ namespace SeaBattle.Main
             {
                 Console.ReadLine();
             
-                var changesList = game.Next(new AttackByRandomPositionCommand(game.Attacker.PlayerId)).ToArray();
+                var changesList = game.Next(new AttackByRandomPositionCommand(game.FirstPlayer.PlayerId)).ToArray();
                 Print(changesList);
             
                 Console.SetCursorPosition(0, 22);

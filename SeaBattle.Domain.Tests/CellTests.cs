@@ -20,7 +20,7 @@ namespace SeaBattle.Domain.Tests
             var fieldId = Guid.NewGuid();
 
             // Act
-            var cell = new Cell(posX, posY);
+            var cell = new Cell(fieldId, posX, posY) {CellType = CellType.Ship};
 
             // Assert
             Assert.AreEqual(posX, cell.X);

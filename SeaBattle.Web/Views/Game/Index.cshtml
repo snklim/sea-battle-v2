@@ -9,15 +9,16 @@
     <div style="padding: 10px;">
         @if (gameDetails.FirstPlayer.UserName == User.Identity.Name)
         {
-            <a href="/game.html?gameid=@gameDetails.Game.GameId&playerid=@gameDetails.FirstPlayer.PlayerId">Play with @gameDetails.SecondPlayer.UserName</a>
+            <a asp-action="Play" asp-route-gameId="@gameDetails.Game.GameId" asp-route-playerId="@gameDetails.FirstPlayer.PlayerId">Play with @gameDetails.SecondPlayer.UserName</a>
         }
 
         @if (gameDetails.SecondPlayer.UserName == User.Identity.Name)
         {
-            <a href="/game.html?gameid=@gameDetails.Game.GameId&playerid=@gameDetails.SecondPlayer.PlayerId">Play with @gameDetails.FirstPlayer.UserName</a>
+            <a asp-action="Play" asp-route-gameId="@gameDetails.Game.GameId" asp-route-playerId="@gameDetails.SecondPlayer.PlayerId">Play with @gameDetails.FirstPlayer.UserName</a>
         }
     </div>
 }
+
 <div style="padding: 10px;">
     <a asp-controller="Game" asp-action="Create">Create</a>
 </div>

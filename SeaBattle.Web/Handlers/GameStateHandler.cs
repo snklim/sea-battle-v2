@@ -8,7 +8,6 @@ using SeaBattle.Domain;
 using SeaBattle.Domain.Commands;
 using SeaBattle.Web.Events;
 using SeaBattle.Web.Managers;
-using SeaBattle.Web.Models;
 
 namespace SeaBattle.Web.Handlers
 {
@@ -30,7 +29,7 @@ namespace SeaBattle.Web.Handlers
         
         private async Task ProcessMessageAsync(Guid gameId, Guid playerId, string action, int posX = -1, int posY = -1)
         {
-            var gameDetails = _gameManager.GetAll().FirstOrDefault(x => x.Game.GameId == gameId);
+            var gameDetails = _gameManager.GetAll(gameId).FirstOrDefault(x => x.Game.GameId == gameId);
 
             if (gameDetails == null)
             {
@@ -67,7 +66,7 @@ namespace SeaBattle.Web.Handlers
             {
                 await Task.Delay(500);
 
-                await ProcessMessageAsync(game.GameId, game.Attacker.PlayerId, "bot_attack");
+                await ProcessMessageAsync(game.GameId, game.AttackerId, "bot_attack");
             });
         }
 
@@ -77,27 +76,27 @@ namespace SeaBattle.Web.Handlers
             {
                 new Changes
                 {
-                    PlayerId = game.Attacker.PlayerId,
-                    FieldId = game.Attacker.OwnField.FieldId,
-                    AffectedCells = game.Attacker.OwnField.GetCells().ToArray()
+                    PlayerId = game.FirstPlayer.PlayerId,
+                    FieldId = game.FirstPlayer.OwnField.FieldId,
+                    AffectedCells = game.FirstPlayer.OwnField.GetCells().ToArray()
                 },
                 new Changes
                 {
-                    PlayerId = game.Attacker.PlayerId,
-                    FieldId = game.Attacker.EnemyField.FieldId,
-                    AffectedCells = game.Attacker.EnemyField.GetCells().ToArray()
+                    PlayerId = game.FirstPlayer.PlayerId,
+                    FieldId = game.FirstPlayer.EnemyField.FieldId,
+                    AffectedCells = game.FirstPlayer.EnemyField.GetCells().ToArray()
                 },
                 new Changes
                 {
-                    PlayerId = game.Defender.PlayerId,
-                    FieldId = game.Defender.OwnField.FieldId,
-                    AffectedCells = game.Defender.OwnField.GetCells().ToArray()
+                    PlayerId = game.SecondPlayer.PlayerId,
+                    FieldId = game.SecondPlayer.OwnField.FieldId,
+                    AffectedCells = game.SecondPlayer.OwnField.GetCells().ToArray()
                 },
                 new Changes
                 {
-                    PlayerId = game.Defender.PlayerId,
-                    FieldId = game.Defender.EnemyField.FieldId,
-                    AffectedCells = game.Defender.EnemyField.GetCells().ToArray()
+                    PlayerId = game.SecondPlayer.PlayerId,
+                    FieldId = game.SecondPlayer.EnemyField.FieldId,
+                    AffectedCells = game.SecondPlayer.EnemyField.GetCells().ToArray()
                 }
             };
 
@@ -121,10 +120,17 @@ namespace SeaBattle.Web.Handlers
                     PlayerId = changesGroup.Key,
                     ChangesList = changesGroup.ToArray(),
                     Message = game.GameIsOver
-                        ? changesGroup.Key == game.Attacker.PlayerId ? "YOU WIN" : "YOU LOSE"
-                        : changesGroup.Key == game.Attacker.PlayerId
+                        ? changesGroup.Key == game.AttackerId ? "YOU WIN" : "YOU LOSE"
+                        : changesGroup.Key == game.AttackerId
                             ? "YOUR TURN"
-                            : "OPPONENT TURN"
+                            : "OPPONENT TURN",
+                    AttackerId = game.AttackerId,
+                    DefenderId = game.DefenderId,
+                    GameIsOver = game.GameIsOver,
+                    FirstPlayerNextPositions = game.FirstPlayer.NextPositions,
+                    FirstPlayerPreviousHits = game.FirstPlayer.PreviousHits,
+                    SecondPlayerNextPositions = game.SecondPlayer.NextPositions,
+                    SecondPlayerPreviousHits = game.SecondPlayer.PreviousHits
                 });
             }
         }

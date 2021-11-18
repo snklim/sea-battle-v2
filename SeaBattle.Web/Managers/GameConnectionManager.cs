@@ -6,7 +6,7 @@ namespace SeaBattle.Web.Managers
 {
     public class GameConnectionManager
     {
-        private readonly Dictionary<Guid, Dictionary<Guid, WebSocket>> _socketsPerGame = new();
+        private static readonly Dictionary<Guid, Dictionary<Guid, WebSocket>> _socketsPerGame = new();
 
         public void Set(Guid gameId, Guid playerId, WebSocket webSocket)
         {

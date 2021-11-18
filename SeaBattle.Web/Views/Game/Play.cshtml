@@ -1,0 +1,159 @@
+@model SeaBattle.Web.ViewModels.PlayViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .field {
+            float: left;
+            margin: 10px;
+        }
+        
+        .row {
+            clear: both;
+        }
+        
+        .cell {
+            margin: 1px;
+            width: 30px;
+            height: 30px;
+            float: left;
+        }
+        
+        .cell-empty {
+            background-color: silver;
+        }
+        
+        .cell-border {
+            background-color: silver;
+        }
+        
+        .cell-ship {
+            background-color: blue;
+        }
+        
+        .cell-attacked {
+            background-color: gray;
+        }
+        
+        .ship-attacked {
+            background-color: red;
+        }
+    </style>
+}
+
+<div id="game"></div>
+<div style="clear: both"></div>
+<div id="message" style="margin: 15px;"></div>
+<script>
+
+$(function (){ 
+    
+    
+
+    var scheme = document.location.protocol === "https:" ? "wss" : "ws";
+    var port = document.location.port ? (":" + document.location.port) : "";
+    var socket = new WebSocket(scheme + "://" + document.location.hostname + port + "/ws");
+    var params = new URLSearchParams(document.location.search);
+    var gameId = "@Model.GameId.ToString()";
+    var playerId = "@Model.PlayerId.ToString()";
+    
+    socket.onopen = function() {
+        socket.send(`start:${gameId}:${playerId}`);
+    }
+    
+    socket.onmessage = function(event) {
+        var gameDetails = JSON.parse(event.data);
+
+        var changesList = gameDetails.ChangesList;
+
+        console.log(gameDetails)
+
+        var model = {};
+
+        var fields = {};
+
+        changesList.forEach((changes, index) => {
+            model[index] = model[index] || {};
+            changes.AffectedCells.forEach(cell => {
+                model[index][cell.X] = model[index][cell.X] || {};
+                model[index][cell.X][cell.Y] = {
+                    CellType: cell.CellType,
+                    Attacked: cell.Attacked,
+                    FieldId: changes.FieldId,
+                    PlayerId: changes.PlayerId
+                };
+                fields[changes.FieldId] = index;
+            })
+        });
+
+        Object.getOwnPropertyNames(model).forEach(fieldIndex => {
+            var $field = $('<div class="field"></div>');
+            $('#game').append($field)
+            Object.getOwnPropertyNames(model[fieldIndex]).forEach(rowIndex => {
+                var $row = $('<div class="row"></div>');
+                $field.append($row);
+                Object.getOwnPropertyNames(model[fieldIndex][rowIndex]).forEach(cellIndex => {
+
+                    var $cell = $(`<div class="cell" data-x="${rowIndex}" data-y="${cellIndex}"></div>`);
+
+                    if (model[fieldIndex][rowIndex][cellIndex].CellType === 0) {
+                        $cell.addClass('cell-empty');
+                    }
+                    if (model[fieldIndex][rowIndex][cellIndex].CellType === 1) {
+                        $cell.addClass('cell-border');
+                    }
+                    if (model[fieldIndex][rowIndex][cellIndex].CellType === 2) {
+                        $cell.addClass('cell-ship');
+                    }
+                    if (model[fieldIndex][rowIndex][cellIndex].Attacked) {
+                        if (model[fieldIndex][rowIndex][cellIndex].CellType === 2)
+                            $cell.addClass('ship-attacked');
+                        else
+                            $cell.addClass('cell-attacked');
+                    }
+                    $row.append($cell);
+
+                    model[fieldIndex][rowIndex][cellIndex].$cell = $cell;
+
+                    $cell.on('click', e => {
+                        var $el = $(e.target);
+
+                        socket.send(`attack:${gameId}:${playerId}:${$el.attr('data-x')}:${$el.attr('data-y')}`);
+                    })
+
+                })
+            })
+        });
+
+        socket.onmessage = function (event) {
+            var gameDetails = JSON.parse(event.data);
+
+            var changesList = gameDetails.ChangesList;
+
+            console.log(gameDetails)
+
+            if (changesList.length > 0) {
+                changesList.forEach(changes => {
+                    var fieldIndex = fields[changes.FieldId];
+                    changes.AffectedCells.forEach(cell => {
+                        if (cell.CellType === 2)
+                            if (cell.Attacked)
+                                model[fieldIndex][cell.X][cell.Y].$cell.addClass('ship-attacked');
+                            else
+                                model[fieldIndex][cell.X][cell.Y].$cell.addClass('cell-ship');
+                        else if (cell.Attacked)
+                            model[fieldIndex][cell.X][cell.Y].$cell.addClass('cell-attacked');
+                    });
+                });
+            }
+
+            $('#message').text(gameDetails.Message);
+        }
+
+        $('#message').text(gameDetails.Message);
+    }
+    });
+</script>

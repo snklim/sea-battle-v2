@@ -29,8 +29,8 @@ namespace SeaBattle.Domain.Tests
 
             // Assert
             Assert.IsNotNull(game);
-            Assert.IsNotNull(game.Attacker.OwnField);
-            Assert.IsNotNull(game.Defender.OwnField);
+            Assert.IsNotNull(game.FirstPlayer.OwnField);
+            Assert.IsNotNull(game.SecondPlayer.OwnField);
         }
         
         [Test]
@@ -53,8 +53,8 @@ namespace SeaBattle.Domain.Tests
 
             // Assert
             Assert.IsNotNull(game);
-            Assert.IsNotNull(game.Attacker.OwnField);
-            Assert.IsNotNull(game.Defender.OwnField);
+            Assert.IsNotNull(game.FirstPlayer.OwnField);
+            Assert.IsNotNull(game.SecondPlayer.OwnField);
         }
         
         [Test]
@@ -74,14 +74,14 @@ namespace SeaBattle.Domain.Tests
                 .WithShipAtPositionOnAttackerField(positionX, positionY, shipLength, Orientation.Horizontal)
                 .WithShipAtPositionOnDefenderField(positionX, positionY, shipLength, Orientation.Horizontal)
                 .Build();
-            var attacker = game.Attacker.PlayerId;
-            var defender = game.Defender.PlayerId;
-            game.Next(new AttackByPositionCommand(0, 0, game.Attacker.PlayerId));
+            var attacker = game.AttackerId;
+            var defender = game.DefenderId;
+            game.Next(new AttackByPositionCommand(0, 0, game.FirstPlayer.PlayerId));
 
             // Assert
             Assert.IsNotNull(game);
-            Assert.AreEqual(attacker, game.Defender.PlayerId);
-            Assert.AreEqual(defender, game.Attacker.PlayerId);
+            Assert.AreEqual(attacker, game.DefenderId);
+            Assert.AreEqual(defender, game.AttackerId);
         }
     }
 }

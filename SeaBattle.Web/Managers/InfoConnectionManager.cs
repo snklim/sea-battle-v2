@@ -5,7 +5,7 @@ namespace SeaBattle.Web.Managers
 {
     public class InfoConnectionManager
     {
-        private readonly Dictionary<string, WebSocket> _connection = new();
+        private static readonly Dictionary<string, WebSocket> _connection = new();
 
         public void Add(string userName, WebSocket webSocket)
         {

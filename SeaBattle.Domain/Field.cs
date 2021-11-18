@@ -10,8 +10,8 @@ namespace SeaBattle.Domain
         private Cell[,] Cells { get; }
         public int SizeX { get; }
         public int SizeY { get; }
-        public Guid FieldId { get; } = Guid.NewGuid();
-        public Dictionary<Guid, ShipDetails> Ships { get; } = new();
+        public Guid FieldId { get; set; } = Guid.NewGuid();
+        public Dictionary<Guid, ShipDetails> Ships { get; set; } = new();
 
         public Field(int sizeX, int sizeY)
         {
@@ -21,7 +21,7 @@ namespace SeaBattle.Domain
             for (var x = 0; x < sizeX; x++)
             for (var y = 0; y < sizeY; y++)
             {
-                Cells[x, y] = new Cell(x, y);
+                Cells[x, y] = new Cell(FieldId, x, y);
             }
         }
 

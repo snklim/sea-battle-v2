@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
@@ -32,7 +33,7 @@ namespace SeaBattle.Web.Controllers
         public IActionResult Index()
         {
             return View(_gameManager.GetAll()
-                .Where(gameDetails => !gameDetails.Game.GameIsOver)
+                .Where(gameDetails => !gameDetails.GameIsOver)
                 .ToArray());
         }
 
@@ -62,12 +63,12 @@ namespace SeaBattle.Web.Controllers
                 Game = game,
                 FirstPlayer = new PlayerDetails
                 {
-                    PlayerId = game.Attacker.PlayerId,
+                    PlayerId = game.FirstPlayer.PlayerId,
                     UserName = User.Identity.Name
                 },
                 SecondPlayer = new PlayerDetails
                 {
-                    PlayerId = game.Defender.PlayerId,
+                    PlayerId = game.SecondPlayer.PlayerId,
                     UserName = model.User
                 }
             });
@@ -80,6 +81,16 @@ namespace SeaBattle.Web.Controllers
             });
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Play(Guid gameId, Guid playerId)
+        {
+            return View(new PlayViewModel
+            {
+                GameId = gameId,
+                PlayerId = playerId
+            });
         }
     }
 }
