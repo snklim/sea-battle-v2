@@ -13,7 +13,7 @@ using SeaBattle.Web.Models;
 
 namespace SeaBattle.Web.Managers
 {
-    public class GameManager : INotificationHandler<GameEvent>
+    public class GameManager
     {
         private readonly ApplicationContext _context;
 
@@ -350,18 +350,9 @@ namespace SeaBattle.Web.Managers
             return field;
         }
 
-        public async Task Handle(GameEvent notification, CancellationToken cancellationToken)
+        public async Task UpdateCells(Changes[] changesList)
         {
-            var gameDb = await _context.Games.FirstAsync(game => game.GameId == notification.GameId,
-                cancellationToken: cancellationToken);
-            gameDb.AttackerId = notification.AttackerId;
-            gameDb.DefenderId = notification.DefenderId;
-            gameDb.GameIsOver = notification.GameIsOver;
-            var firstPlayerDb = await _context.Players.FirstAsync(x => x.PlayerId == gameDb.FirstPlayerId,
-                cancellationToken: cancellationToken);
-            var secondPlayerDb = await _context.Players.FirstAsync(x => x.PlayerId == gameDb.SecondPlayerId,
-                cancellationToken: cancellationToken);
-            foreach (var changes in notification.ChangesList)
+            foreach (var changes in changesList)
             {
                 foreach (var cell in changes.AffectedCells)
                 {
@@ -372,12 +363,25 @@ namespace SeaBattle.Web.Managers
                     cellDb.CellType = (int) cell.CellType;
                 }
             }
+            
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Update(Game game)
+        {
+            var gameDb = await _context.Games.FirstAsync(game => game.GameId == game.GameId);
+            gameDb.AttackerId = game.AttackerId;
+            gameDb.DefenderId = game.DefenderId;
+            gameDb.GameIsOver = game.GameIsOver;
+            
+            var firstPlayerDb = await _context.Players.FirstAsync(x => x.PlayerId == gameDb.FirstPlayerId);
+            var secondPlayerDb = await _context.Players.FirstAsync(x => x.PlayerId == gameDb.SecondPlayerId);
 
             _context.Positions.RemoveRange(_context.Positions.Where(x => x.FieldId == firstPlayerDb.EnemyFieldId));
 
             _context.Positions.RemoveRange(_context.Positions.Where(x => x.FieldId == secondPlayerDb.EnemyFieldId));
 
-            foreach (var position in notification.FirstPlayerNextPositions)
+            foreach (var position in game.FirstPlayer.NextPositions)
             {
                 _context.Positions.Add(new SeaBattlePosition
                 {
@@ -388,7 +392,7 @@ namespace SeaBattle.Web.Managers
                 });
             }
 
-            foreach (var position in notification.FirstPlayerPreviousHits)
+            foreach (var position in game.FirstPlayer.PreviousHits)
             {
                 _context.Positions.Add(new SeaBattlePosition
                 {
@@ -399,7 +403,7 @@ namespace SeaBattle.Web.Managers
                 });
             }
 
-            foreach (var position in notification.SecondPlayerNextPositions)
+            foreach (var position in game.SecondPlayer.NextPositions)
             {
                 _context.Positions.Add(new SeaBattlePosition
                 {
@@ -410,7 +414,7 @@ namespace SeaBattle.Web.Managers
                 });
             }
 
-            foreach (var position in notification.SecondPlayerPreviousHits)
+            foreach (var position in game.SecondPlayer.PreviousHits)
             {
                 _context.Positions.Add(new SeaBattlePosition
                 {
@@ -421,7 +425,7 @@ namespace SeaBattle.Web.Managers
                 });
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync();
         }
     }
 }

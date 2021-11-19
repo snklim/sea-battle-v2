@@ -112,25 +112,21 @@ namespace SeaBattle.Web.Handlers
 
         private async Task UpdateConsumersAsync(Game game, IReadOnlyCollection<Changes> changesList)
         {
+            await _gameManager.Update(game);
             foreach (var changesGroup in changesList.GroupBy(x => x.PlayerId))
             {
+                var changes = changesGroup.ToArray();
+                await _gameManager.UpdateCells(changes);
                 await _mediator.Publish(new GameEvent
                 {
                     GameId = game.GameId,
                     PlayerId = changesGroup.Key,
-                    ChangesList = changesGroup.ToArray(),
+                    ChangesList = changes,
                     Message = game.GameIsOver
                         ? changesGroup.Key == game.AttackerId ? "YOU WIN" : "YOU LOSE"
                         : changesGroup.Key == game.AttackerId
                             ? "YOUR TURN"
-                            : "OPPONENT TURN",
-                    AttackerId = game.AttackerId,
-                    DefenderId = game.DefenderId,
-                    GameIsOver = game.GameIsOver,
-                    FirstPlayerNextPositions = game.FirstPlayer.NextPositions,
-                    FirstPlayerPreviousHits = game.FirstPlayer.PreviousHits,
-                    SecondPlayerNextPositions = game.SecondPlayer.NextPositions,
-                    SecondPlayerPreviousHits = game.SecondPlayer.PreviousHits
+                            : "OPPONENT TURN"
                 });
             }
         }
