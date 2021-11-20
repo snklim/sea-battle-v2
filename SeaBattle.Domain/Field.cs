@@ -7,21 +7,24 @@ namespace SeaBattle.Domain
 {
     public class Field
     {
-        private Cell[,] Cells { get; }
-        public int SizeX { get; }
-        public int SizeY { get; }
+        public Cell[][] Cells { get; set; }
+        public int SizeX { get; set; }
+        public int SizeY { get; set; }
         public Guid FieldId { get; set; } = Guid.NewGuid();
         public Dictionary<Guid, ShipDetails> Ships { get; set; } = new();
 
         public Field(int sizeX, int sizeY)
         {
-            Cells = new Cell[sizeX, sizeY];
+            Cells = new Cell[sizeX][];
             SizeX = sizeX;
             SizeY = sizeY;
             for (var x = 0; x < sizeX; x++)
-            for (var y = 0; y < sizeY; y++)
             {
-                Cells[x, y] = new Cell(FieldId, x, y);
+                Cells[x] = new Cell[sizeY];
+                for (var y = 0; y < sizeY; y++)
+                {
+                    Cells[x][y] = new Cell(FieldId, x, y);
+                }
             }
         }
 
@@ -31,7 +34,7 @@ namespace SeaBattle.Domain
             {
                 if (IsPositionValid(x, y))
                 {
-                    return Cells[x, y];
+                    return Cells[x][y];
                 }
 
                 throw new ApplicationException("Position is invalid");
@@ -40,7 +43,7 @@ namespace SeaBattle.Domain
             {
                 if (IsPositionValid(x, y))
                 {
-                    Cells[x, y] = value;
+                    Cells[x][y] = value;
                     return;
                 }
 

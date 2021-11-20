@@ -116,7 +116,6 @@ namespace SeaBattle.Web.Handlers
             foreach (var changesGroup in changesList.GroupBy(x => x.PlayerId))
             {
                 var changes = changesGroup.ToArray();
-                await _gameManager.UpdateCells(changes);
                 await _mediator.Publish(new GameEvent
                 {
                     GameId = game.GameId,

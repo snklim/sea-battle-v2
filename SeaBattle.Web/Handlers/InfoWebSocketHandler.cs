@@ -12,9 +12,9 @@ namespace SeaBattle.Web.Handlers
     {
         private readonly InfoConnectionManager _connectionManager;
 
-        public InfoWebSocketHandler(InfoConnectionManager _connectionManager)
+        public InfoWebSocketHandler(InfoConnectionManager connectionManager)
         {
-            this._connectionManager = _connectionManager;
+            _connectionManager = connectionManager;
         }
         
         public override async Task OnConnected(HttpContext context, WebSocket webSocket)

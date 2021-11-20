@@ -12,8 +12,8 @@ namespace SeaBattle.Domain
         public Field OwnField { get; set; }
         public Field EnemyField { get; set; }
 
-        public List<Position> NextPositions { get; } = new();
-        public List<Position> PreviousHits { get; } = new();
+        public List<Position> NextPositions { get; set; } = new();
+        public List<Position> PreviousHits { get; set; } = new();
 
         public bool Attack(Player defender, int posX, int posY, out IReadOnlyCollection<Changes> changesList)
         {

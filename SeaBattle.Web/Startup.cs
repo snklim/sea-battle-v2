@@ -38,7 +38,9 @@ namespace SeaBattle.Web
             services.AddScoped<GameManager>();
 
             services.AddDbContext<ApplicationContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseNpgsql("Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=Qwerty1234");
+            });
 
             services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationContext>();
